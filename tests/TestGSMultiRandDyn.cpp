@@ -5,6 +5,7 @@
 #include <ctime>
 #include <random>
 #include <glm/glm.hpp>
+#include <functional>
 
 
 // Global variable from tests/main.cpp -- the random seed that we should use.

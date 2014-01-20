@@ -5,6 +5,7 @@
 #include <ctime>
 #include <random>
 #include <glm/glm.hpp>
+#include <functional>
 
 // This is very similar to TestGSMultiRandDynGroupRec, but instead of using
 // recursive execution, all componentsare returned in groups to the excute

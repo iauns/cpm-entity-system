@@ -5,6 +5,7 @@
 #include <ctime>
 #include <random>
 #include <glm/glm.hpp>
+#include <functional>
 
 // This test randomly generates multiple components associated with each entity
 // ID. This allows us to test that the recursive execution done by
