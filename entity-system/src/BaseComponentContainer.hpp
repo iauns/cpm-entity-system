@@ -46,6 +46,7 @@ public:
   /// If the index is not present, the function returns 0 (an invalid sequence).
   virtual uint64_t getSequenceFromIndex(int index) = 0;
 
+  static const int StaticEntID = 1;
 
 };
 

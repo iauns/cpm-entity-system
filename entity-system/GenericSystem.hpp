@@ -361,11 +361,6 @@ public:
     }
     else
     {
-      /// \todo special case for all static components? We need to know when
-      ///       to terminate in the all-static case, which we don't account
-      ///       for currently. The code below only accounts for the
-      ///       all-optional case.
-
       // This else clause is called when *all* components are optional or
       // static. Not a single one is mandatory other than the static components,
       // whose existence has already been tested above.
@@ -384,57 +379,104 @@ public:
       ///       is only a corner case and very few, if any, systems need
       ///       this case where all components are optional.
       std::set<uint64_t> sequenceSet;
-      GenSequenceSet<0, Ts...>::exec(sequenceSet, componentArrays, numComponents);
+      GenSequenceSet<0, Ts...>::exec(sequenceSet, componentArrays,
+                                     isStatic, numComponents);
 
-      // Use the set as a list of target sequences when iterating over the
-      // sequences.
-      for (auto it = sequenceSet.begin(); it != sequenceSet.end(); ++it)
+      if (sequenceSet.size() != 0)
       {
-        uint64_t targetSequence = *it;
-
-        // Find the target sequence in the components.
-        for (int i = 0; i < baseComponents.size(); ++i)
+        // Use the set as a list of target sequences when iterating over the
+        // sequences.
+        for (auto it = sequenceSet.begin(); it != sequenceSet.end(); ++it)
         {
-          uint64_t curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
-          while (curSequence < targetSequence && indices[i] != numComponents[i])
+          uint64_t targetSequence = *it;
+
+          // Find the target sequence in the components.
+          for (int i = 0; i < baseComponents.size(); ++i)
           {
-            ++indices[i];
-            if (indices[i] == numComponents[i])
-              break;   // We are done.
-            curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+            uint64_t curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+            while (curSequence < targetSequence && indices[i] != numComponents[i])
+            {
+              ++indices[i];
+              if (indices[i] == numComponents[i])
+                break;   // We are done.
+              curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+            }
+
+            // We are never going to fail finding this sequence in at least one
+            // of the optional components.
           }
 
-          // We are never going to fail finding this sequence in at least one
-          // of the optional components.
-        }
-
-        // Execute with indices. This recursive execute will perform a cartesian
-        // product.
-        if (group == false)
-        {
-          if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
-                                              numComponents, indices, 
+          // Execute with indices. This recursive execute will perform a cartesian
+          // product.
+          if (group == false)
+          {
+            if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
+                                                numComponents, indices, 
+                                                optionalComponents, isStatic,
+                                                nextIndices, values,
+                                                targetSequence))
+            {
+              return; // We have reached the end of an array.
+            }
+          }
+          else
+          {
+            if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
+                                              numComponents, indices,
                                               optionalComponents, isStatic,
-                                              nextIndices, values,
+                                              nextIndices, groupValues,
                                               targetSequence))
-          {
-            return; // We have reached the end of an array.
+            {
+              return; // We have reached the end of an arry
+            }
           }
+
+          // Copy nextIndices into indices.
+          indices = nextIndices;
         }
-        else
+      }
+      else // if (sequenceSet.size() != 0)
+      {
+        // When the sequence set is zero, that means that we could have a corner
+        // case where all of the components are static. If that is the case,
+        // then we simply iterate over all static members, either as a group
+        // or recursively. If there are any optional components, then we don't
+        // execute at all.
+        bool allStatic = true;
+        for (int i = 0; i < sizeof...(Ts); ++i)
         {
-          if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
-                                            numComponents, indices,
-                                            optionalComponents, isStatic,
-                                            nextIndices, groupValues,
-                                            targetSequence))
+          if (isStatic[i] == false)
           {
-            return; // We have reached the end of an arry
+            allStatic = false;
+            break;
           }
         }
 
-        // Copy nextIndices into indices.
-        indices = nextIndices;
+        if (allStatic)
+        {
+          if (group == false)
+          {
+            if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
+                                                numComponents, indices, 
+                                                optionalComponents, isStatic,
+                                                nextIndices, values,
+                                                BaseComponentContainer::StaticEntID))
+            {
+              return; // We have reached the end of an array.
+            }
+          }
+          else
+          {
+            if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
+                                              numComponents, indices,
+                                              optionalComponents, isStatic,
+                                              nextIndices, groupValues,
+                                              BaseComponentContainer::StaticEntID))
+            {
+              return; // We have reached the end of an arry
+            }
+          }
+        }
       }
     }
   }
@@ -453,19 +495,27 @@ public:
   {
     static void exec(std::set<uint64_t>& sequenceSet,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
+                     const std::array<bool, sizeof...(Ts)>& componentStatic,
                      const std::array<int, sizeof...(Ts)>& componentSizes)
     {
       typename ComponentContainer<RT>::ComponentItem* array = std::get<TupleIndex>(componentArrays);
+      bool isStatic     = componentStatic[TupleIndex];
 
-      // Loop over components at this RT.
-      for (int i = 0; i < componentSizes[TupleIndex]; ++i)
+      // Only generate set of sequences if we do not have a static component.
+      // Static componets always have 1 sequence, and they are handled
+      // internally by the RecurseExecute and GroupExecute template structures.
+      if (!isStatic)
       {
-        sequenceSet.insert(array[i].sequence);
+        // Loop over components at this RT.
+        for (int i = 0; i < componentSizes[TupleIndex]; ++i)
+        {
+          sequenceSet.insert(array[i].sequence);
+        }
       }
 
       // Recurse into corresponding container.
-      GenSequenceSet<TupleIndex + 1, RTs...>::exec(sequenceSet,
-                                                   componentArrays, componentSizes);
+      GenSequenceSet<TupleIndex + 1, RTs...>::exec(
+          sequenceSet, componentArrays, componentStatic, componentSizes);
     }
   };
 
@@ -473,8 +523,9 @@ public:
   struct GenSequenceSet<TupleIndex>
   {
     static void exec(std::set<uint64_t>& /*sequenceSet*/,
-                     const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& /*componentArrays*/,
-                     const std::array<int, sizeof...(Ts)>& /*componentSizes*/)
+                     const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& /* componentArrays */,
+                     const std::array<bool, sizeof...(Ts)>& /* componentStatic */,
+                     const std::array<int, sizeof...(Ts)>& /* componentSizes */)
     {}
   };
 
