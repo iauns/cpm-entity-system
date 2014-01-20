@@ -7,11 +7,6 @@
 // the BaseSystem interface to iterate over all systems with the 
 // walkComponentsOver override.
 
-/// \todo Implement all-optional corner case for walk entity, and walk
-///       all components. In this case, All combinations of all existing
-///       entities will be called. No memoize. All possible combinations
-///       will be issued.
-
 #include <iostream>
 #include <array>
 #include <set>          // Only used in a corner case of walkComponents where
