@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <iostream>
+#include <stdexcept>
 #include "src/ComponentContainer.hpp"
 #include "src/BaseSystem.hpp"
 
