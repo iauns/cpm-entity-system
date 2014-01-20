@@ -97,6 +97,14 @@ public:
   /// Returns -1 if no component of the given sequence is found.
   int getComponentItemIndexWithSequence(uint64_t sequence)
   {
+    if (mComponents.size() == 0)
+      return -1;
+
+    // You cannot search within static components. They are the same for all
+    // entities. Therefore we return the first index, 0.
+    if (isStatic())
+      return 0;
+
     auto last = mComponents.begin() + mLastSortedSize;
 
     ComponentItem item;
@@ -117,6 +125,12 @@ public:
 
   ComponentItem* getComponentItemWithSequence(uint64_t sequence)
   {
+    if (mComponents.size() == 0)
+      return nullptr;
+
+    if (isStatic())
+      return &mComponents.front();
+
     auto last = mComponents.begin() + mLastSortedSize;
 
     // Unfortunately, we have to do this in order to take advantage of
@@ -329,7 +343,7 @@ public:
   /// Used only for debugging purposes (see addStaticComponent in ESCore).
   size_t getSizeOfBackingContainer()  {return mComponents.size();}
 
-  bool isStatic()             {return mIsStatic;}
+  bool isStatic() override    {return mIsStatic;}
   void setStatic(bool truth)  {mIsStatic = truth;}
 
   int mLastSortedSize;                ///< Unsorted elements can be added to the end

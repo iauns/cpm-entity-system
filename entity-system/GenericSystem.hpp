@@ -144,6 +144,7 @@ public:
 
     std::array<int, sizeof...(Ts)> indices = { dynamic_cast<ComponentContainer<Ts>*>(core.getComponentContainer(TemplateID<Ts>::getID()))->getComponentItemIndexWithSequence(entityID)... };
     std::array<int, sizeof...(Ts)> nextIndices;
+    std::array<bool, sizeof...(Ts)> isStatic = { core.getComponentContainer(TemplateID<Ts>::getID())->isStatic()... };
     std::array<int, sizeof...(Ts)> numComponents = { core.getComponentContainer(TemplateID<Ts>::getID())->getNumComponents()... };
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
@@ -157,6 +158,8 @@ public:
     bool execute = true;
     for (int i = 0; i < indices.size(); i++)
     {
+      // Note: For static components, getComponentItemIndexWithSequence always
+      //       returns 0. Which is the correct index to start at.
       if (indices[i] == -1)
       {
         if (!optionalComponents[i])
@@ -179,12 +182,12 @@ public:
     {
       if (group == false)
         RecurseExecute<0, Ts...>::exec(this, componentArrays, numComponents,
-                                       indices, optionalComponents, nextIndices,
-                                       values, entityID);
+                                       indices, optionalComponents, isStatic,
+                                       nextIndices, values, entityID);
       else
         GroupExecute<0, Ts...>::exec(this, componentArrays, numComponents,
-                                     indices, optionalComponents, nextIndices,
-                                     groupValues, entityID);
+                                     indices, optionalComponents, isStatic,
+                                     nextIndices, groupValues, entityID);
       return true;
     }
     else
@@ -215,6 +218,7 @@ public:
     std::array<int, sizeof...(Ts)> indices;
     std::array<int, sizeof...(Ts)> nextIndices;
     std::array<int, sizeof...(Ts)> numComponents;
+    std::array<bool, sizeof...(Ts)> isStatic;
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
     // Start off with std::numeric_limits max on lowest upper sequence,
@@ -230,16 +234,17 @@ public:
     {
       bool optional = optionalComponents[i];
       // An empty mandatory component results in an immediate termination
-      // of the walk.
+      // of the walk. Even if the component is static.
       if (baseComponents[i]->getNumComponents() == 0 && !optional)
         return;
 
       indices[i] = 0;
       nextIndices[i] = 0;
       numComponents[i] = baseComponents[i]->getNumComponents();
+      isStatic[i] = baseComponents[i]->isStatic();
 
-      // Optional components are not allowed to be a leading component.
-      if (optional)
+      // Optional and static components are not allowed to be leading components
+      if (optional || isStatic[i])
         continue;
 
       if (baseComponents[i]->getUpperSequence() < lowestUpperSequence)
@@ -257,15 +262,15 @@ public:
     std::tuple<Ts*...> values;                    ///< Values that will be passed into execute.
     std::tuple<ComponentGroup<Ts>...> groupValues;  ///< Grouped values that will be passed into group execute.
 
-    // leadingComponent == -1 if and only if the number of optional 
-    // components == sizeof...(Ts). Because the if statement following
-    // the "if (optional) contitue;" statement will always succeed
+    // leadingComponent == -1 if and only if the number of optional and static
+    // components == sizeof...(Ts). Because the if statement following the
+    // "if (optional || isStatic) contitue;" statement will always succeed
     // due to the numeric_limits setting, leading to a valid value of
     // loading component.
     if (leadingComponent != -1)
     {
       // This clause is called when there is at least 1 non-optional
-      // (mandatory) component in the system.
+      // (mandatory) non-static component in the system.
 
       // Start off at the first target sequence and march forward from there.
       uint64_t targetSequence = baseComponents[leadingComponent]->getSequenceFromIndex(indices[leadingComponent]);
@@ -277,32 +282,39 @@ public:
         {
           uint64_t curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
           bool optional = optionalComponents[i];
+          bool compStatic = isStatic[i];
 
-          // Note: when indices[i] = numComponents[i], we necessarily have an
-          // optional component. This is because of the check for a zero number
-          // of components above, in conjunction with the iteration logic
-          // below. We always exit the function if we reach the end of a
-          // mandatory component's array; but for an optional we break out and
-          // continue.
-          while (curSequence < targetSequence && indices[i] != numComponents[i])
+          // Static components don't have associated sequences.
+          // They are always at index 0 and always valid. Existance of some
+          // static components were guaranteed above.
+          if (!compStatic)  
           {
-            ++indices[i];
-            // Check to see if this is an optional component! If it is, then
-            // we shouldn't return!
-            if (indices[i] == numComponents[i])
+            // Note: when indices[i] = numComponents[i], we necessarily have an
+            // optional component. This is because of the check for a zero number
+            // of components above, in conjunction with the iteration logic
+            // below. We always exit the function if we reach the end of a
+            // mandatory component's array; but for an optional we break out and
+            // continue.
+            while (curSequence < targetSequence && indices[i] != numComponents[i])
             {
-              if (!optional)
-                return;   // We are done -- this was a mandatory component and we reached the end of its list.
-              else
-                break;    // Can't go any further.
+              ++indices[i];
+              // Check to see if this is an optional component! If it is, then
+              // we shouldn't return!
+              if (indices[i] == numComponents[i])
+              {
+                if (!optional)
+                  return;   // We are done -- this was a mandatory component and we reached the end of its list.
+                else
+                  break;    // Can't go any further.
+              }
+              curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
             }
-            curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
-          }
 
-          if (curSequence != targetSequence && !optional)
-          {
-            failed = true;
-            break;
+            if (curSequence != targetSequence && !optional)
+            {
+              failed = true;
+              break;
+            }
           }
         }
 
@@ -314,8 +326,9 @@ public:
           {
             if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
                                                 numComponents, indices, 
-                                                optionalComponents, nextIndices,
-                                                values, targetSequence))
+                                                optionalComponents, isStatic,
+                                                nextIndices, values,
+                                                targetSequence))
             {
               return; // We have reached the end of an array.
             }
@@ -324,8 +337,9 @@ public:
           {
             if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
                                               numComponents, indices,
-                                              optionalComponents, nextIndices,
-                                              groupValues, targetSequence))
+                                              optionalComponents, isStatic,
+                                              nextIndices, groupValues,
+                                              targetSequence))
             {
               return;
             }
@@ -347,8 +361,14 @@ public:
     }
     else
     {
-      // This else clause is called when *all* components are optional. Not
-      // a single one is mandatory.
+      /// \todo special case for all static components? We need to know when
+      ///       to terminate in the all-static case, which we don't account
+      ///       for currently. The code below only accounts for the
+      ///       all-optional case.
+
+      // This else clause is called when *all* components are optional or
+      // static. Not a single one is mandatory other than the static components,
+      // whose existence has already been tested above.
 
       // Now we walk in a different fashion than above.
 
@@ -394,8 +414,9 @@ public:
         {
           if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
                                               numComponents, indices, 
-                                              optionalComponents, nextIndices,
-                                              values, targetSequence))
+                                              optionalComponents, isStatic,
+                                              nextIndices, values,
+                                              targetSequence))
           {
             return; // We have reached the end of an array.
           }
@@ -404,8 +425,9 @@ public:
         {
           if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
                                             numComponents, indices,
-                                            optionalComponents, nextIndices,
-                                            groupValues, targetSequence))
+                                            optionalComponents, isStatic,
+                                            nextIndices, groupValues,
+                                            targetSequence))
           {
             return; // We have reached the end of an arry
           }
@@ -467,6 +489,7 @@ public:
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
                      const std::array<bool, sizeof...(Ts)>& componentOptional,
+                     const std::array<bool, sizeof...(Ts)>& componentStatic,
                      std::array<int, sizeof...(Ts)>& nextIndices,
                      std::tuple<Ts*...>& input,
                      uint64_t targetSequence)
@@ -474,6 +497,7 @@ public:
       int arraySize     = componentSizes[TupleIndex];
       int currentIndex  = indices[TupleIndex];
       bool optional     = componentOptional[TupleIndex];
+      bool isStatic     = componentStatic[TupleIndex];
       typename ComponentContainer<RT>::ComponentItem* array = std::get<TupleIndex>(componentArrays);
 
       // Check to see if we are at the end of the array. This will happen with
@@ -494,10 +518,17 @@ public:
       else
       {
         // Only pass target sequence 
-        if (array[currentIndex].sequence != targetSequence)
+        if (array[currentIndex].sequence != targetSequence || isStatic)
         {
-          if (!optional) std::cerr << "Generic System: invalid sequence on non-optional component!!" << std::endl;
-          std::get<TupleIndex>(input) = nullptr;
+          if (isStatic && arraySize > 0)
+          {
+            std::get<TupleIndex>(input) = &array[0].component;
+          }
+          else
+          {
+            if (!optional) std::cerr << "Generic System: invalid sequence on non-optional component!!" << std::endl;
+            std::get<TupleIndex>(input) = nullptr;
+          }
         }
         else
         {
@@ -510,7 +541,7 @@ public:
       bool reachedEnd = false;
       if (!RecurseExecute<TupleIndex + 1, RTs...>::exec(ptr,
               componentArrays, componentSizes, indices, componentOptional,
-              nextIndices, input, targetSequence))
+              componentStatic, nextIndices, input, targetSequence))
       {
         reachedEnd = true;
       }
@@ -518,46 +549,62 @@ public:
       // Only increment current index if we are currently on the target
       // sequence. This *can* happen if we have an optional component that
       // passed nullptr in as its parameter.
-      if (array[currentIndex].sequence == targetSequence)
-        ++currentIndex;
-
-      if (currentIndex == arraySize)
+      if (!isStatic)
       {
-        if (nextIndices[TupleIndex] < currentIndex)
-          nextIndices[TupleIndex] = currentIndex;
+        if (array[currentIndex].sequence == targetSequence)
+          ++currentIndex;
 
-        // Terminate early in either case, but with different return values.
-        // For optional components, reaching the end of the array does not
-        // necessarily mean we should terminate the algorithm.
-        if (optional)
-          return true;
-        else
-          return false;
-      }
-
-      // Loop until we find a sequence that is not in our target.
-      while (array[currentIndex].sequence == targetSequence)
-      {
-        std::get<TupleIndex>(input) = &array[currentIndex].component;
-        // We don't need to check return value of RecurseExecute since any
-        // lower component would have returned false on the first call. The
-        // result of the first call is cached in reachedEnd.
-        RecurseExecute<TupleIndex + 1, RTs...>::exec(ptr,
-            componentArrays, componentSizes, indices, componentOptional,
-            nextIndices, input, targetSequence);
-
-        ++currentIndex;
         if (currentIndex == arraySize)
         {
+          if (nextIndices[TupleIndex] < currentIndex)
+            nextIndices[TupleIndex] = currentIndex;
+
+          // Terminate early in either case, but with different return values.
+          // For optional components, reaching the end of the array does not
+          // necessarily mean we should terminate the algorithm.
           if (optional)
-            break;
+            return true;
           else
             return false;
         }
-      }
+        // Loop until we find a sequence that is not in our target.
+        while (array[currentIndex].sequence == targetSequence)
+        {
+          std::get<TupleIndex>(input) = &array[currentIndex].component;
+          // We don't need to check return value of RecurseExecute since any
+          // lower component would have returned false on the first call. The
+          // result of the first call is cached in reachedEnd.
+          RecurseExecute<TupleIndex + 1, RTs...>::exec(
+              ptr, componentArrays, componentSizes, indices, componentOptional,
+              componentStatic, nextIndices, input, targetSequence);
 
-      if (nextIndices[TupleIndex] < currentIndex)
-        nextIndices[TupleIndex] = currentIndex;
+          ++currentIndex;
+          if (currentIndex == arraySize)
+          {
+            if (optional)
+              break;
+            else
+              return false;
+          }
+        }
+
+        if (nextIndices[TupleIndex] < currentIndex)
+          nextIndices[TupleIndex] = currentIndex;
+      }
+      else // if (!isStatic)
+      {
+        // Loop over static array (we've already executed the first element above).
+        for (int i = 1; i < arraySize; ++i)
+        {
+          std::get<TupleIndex>(input) = &array[i].component;
+          // We don't need to check return value of RecurseExecute since any
+          // lower component would have returned false on the first call. The
+          // result of the first call is cached in reachedEnd.
+          RecurseExecute<TupleIndex + 1, RTs...>::exec(
+              ptr, componentArrays, componentSizes, indices, componentOptional,
+              componentStatic, nextIndices, input, targetSequence);
+        }
+      }
 
       if (reachedEnd)
         return false;
@@ -574,6 +621,7 @@ public:
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
                      const std::array<bool, sizeof...(Ts)>& componentOptional,
+                     const std::array<bool, sizeof...(Ts)>& componentStatic,
                      std::array<int, sizeof...(Ts)>& nextIndices,
                      std::tuple<Ts*...>& input,
                      uint64_t targetSequence)
@@ -595,6 +643,7 @@ public:
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
                      const std::array<bool, sizeof...(Ts)>& componentOptional,
+                     const std::array<bool, sizeof...(Ts)>& componentStatic,
                      std::array<int, sizeof...(Ts)>& nextIndices,
                      std::tuple<ComponentGroup<Ts>...>& input,
                      uint64_t targetSequence)
@@ -602,11 +651,12 @@ public:
       int arraySize     = componentSizes[TupleIndex];
       int currentIndex  = indices[TupleIndex];
       bool optional     = componentOptional[TupleIndex];
+      bool isStatic     = componentStatic[TupleIndex];
       typename ComponentContainer<RT>::ComponentItem* array = std::get<TupleIndex>(componentArrays);
       bool endOfArray   = false;
 
       // Check to see if we are at the end of the array. This will happen with
-      // optional components.
+      // optional components. Static components will never enter this case.
       if (currentIndex == arraySize)
       {
         if (optional)
@@ -617,18 +667,26 @@ public:
         else
         {
           // Terminate early if we are at the end of the array and are not an
-          // optional component.
+          // optional component (this works for isStatic as well).
           return false;
         }
       }
       else
       {
         // Only pass target sequence 
-        if (array[currentIndex].sequence != targetSequence)
+        if (array[currentIndex].sequence != targetSequence || isStatic)
         {
-          if (!optional) std::cerr << "Generic System: invalid sequence on non-optional component!!" << std::endl;
-          std::get<TupleIndex>(input).numComponents = 0;
-          std::get<TupleIndex>(input).components = nullptr;
+          if (isStatic && arraySize > 0)
+          {
+            std::get<TupleIndex>(input).numComponents = arraySize;
+            std::get<TupleIndex>(input).components = &array[0];
+          }
+          else
+          {
+            if (!optional) std::cerr << "Generic System: invalid sequence on non-optional or static component!!" << std::endl;
+            std::get<TupleIndex>(input).numComponents = 0;
+            std::get<TupleIndex>(input).components = nullptr;
+          }
         }
         else
         {
@@ -660,7 +718,7 @@ public:
       // we found.
       if (!GroupExecute<TupleIndex + 1, RTs...>::exec(ptr,
               componentArrays, componentSizes, indices, componentOptional,
-              nextIndices, input, targetSequence))
+              componentStatic, nextIndices, input, targetSequence))
       {
         return false;
       }
@@ -683,6 +741,7 @@ public:
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
                      const std::array<bool, sizeof...(Ts)>& componentOptional,
+                     const std::array<bool, sizeof...(Ts)>& componentStatic,
                      std::array<int, sizeof...(Ts)>& nextIndices,
                      std::tuple<ComponentGroup<Ts>...>& input,
                      uint64_t targetSequence)

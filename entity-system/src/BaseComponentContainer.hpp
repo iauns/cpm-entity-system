@@ -34,6 +34,11 @@ public:
   /// Removes the last component found that is associated with 'sequence'.
   virtual void removeLastSequence(uint64_t sequence) = 0;
 
+  /// Returns true if the component system contains only static elements.
+  /// These elements values are always the same regardless of the entity
+  /// executing. Use for global values.
+  virtual bool isStatic() = 0;
+
   /// Retrieves the sequence associated with the given index.
   /// Index must be in [0, getNumComponents()).
   /// Be careful when using this function, cache misses are likely if you

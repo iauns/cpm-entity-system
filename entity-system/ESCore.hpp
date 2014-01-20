@@ -145,6 +145,10 @@ private:
     return componentContainer;
   }
 
+  /// \todo Optionally convert this map into a flat array? The array would
+  ///       begin at the component with the lowest TemplateID and continue up
+  ///       to the entity with the highest templateID. More than likely, this
+  ///       should be a manually allocated array.
   std::map<uint64_t, BaseComponentContainer*> mComponents;
   uint64_t                                    mCurSequence;
 };
