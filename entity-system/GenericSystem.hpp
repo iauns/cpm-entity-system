@@ -131,7 +131,8 @@ public:
   {
     /// \todo Remove excess calls to getComponentContainer. There should only
     ///       be one call made to getComponentContainer. Also think about
-    ///       caching the component containers.
+    ///       caching the component containers. Note: This won't be an issue
+    ///       if we make the component container a flat array.
     if (sizeof...(Ts) == 0)
       return false;
 
