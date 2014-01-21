@@ -18,6 +18,14 @@
 
 namespace CPM_ES_NS {
 
+// Simple structure to group like components (components belonging to the
+// same entity). Used when shouldGroupComponents returns true.
+template <typename T>
+struct ComponentGroup
+{
+  size_t numComponents;
+  typename ComponentContainer<T>::ComponentItem* components;
+};
 
 namespace gs_detail
 {
@@ -103,16 +111,6 @@ struct is_unique_impl<B, T, U...> : if_t< std::is_base_of< id<T>, B>, std::false
 
 template< class ...T >struct is_unique : is_unique_impl< empty, T ... > {};
 } // mpl    
-
-
-// Simple structure to group like components (components belonging to the
-// same entity). Used when shouldGroupComponents returns true.
-template <typename T>
-struct ComponentGroup
-{
-  size_t numComponents;
-  typename ComponentContainer<T>::ComponentItem* components;
-};
 
 
 /// Base class implementation of generic system. You do not need instances of
