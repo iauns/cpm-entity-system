@@ -199,6 +199,13 @@ public:
 
   void walkComponents(ESCore& core) override
   {
+    preWalkComponents(core);
+    walkComponentsInternal(core);
+    postWalkComponents(core);
+  }
+
+  void walkComponentsInternal(ESCore& core)
+  {
     if (sizeof...(Ts) == 0)
       return;
 
@@ -822,6 +829,14 @@ public:
   /// This function should be overriden and return true for all components
   /// which may be optional.
   virtual bool isComponentOptional(uint64_t templateID)   {return false;}
+
+  /// This function gets called before we start walking components from the
+  /// walkComponents function.
+  virtual void preWalkComponents(ESCore& core)            {}
+
+  /// This function gets called after we finish walking components from the
+  /// walkComponents function.
+  virtual void postWalkComponents(ESCore& core)           {}
 };
 
 
