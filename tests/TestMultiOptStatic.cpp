@@ -145,11 +145,9 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  bool isComponentOptional(uint64_t templateID)
+  bool isComponentOptional(uint64_t templateID) override
   {
-    if (templateID == es::TemplateID<CompHomPos>::getID()) return true;
-    else if (templateID == es::TemplateID<CompPosition>::getID()) return true;
-    else return false;
+    return es::OptionalComponents<CompHomPos, CompPosition>(templateID);
   }
 
   void execute(uint64_t entityID, CompStaticLightDir* dir, CompPosition* pos, 

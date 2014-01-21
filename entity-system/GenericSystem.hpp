@@ -839,6 +839,35 @@ public:
   virtual void postWalkComponents(ESCore& core)           {}
 };
 
+namespace optional_components_impl
+{
+template <typename... RTs>
+struct OptionalCompImpl;
+
+template <typename RT, typename... RTs>
+struct OptionalCompImpl<RT, RTs...>
+{
+  static bool exec(uint64_t templateID)
+  {
+    if (TemplateID<RT>::getID() == templateID) return true;
+    else return OptionalCompImpl<RTs...>::exec(templateID);
+  }
+};
+
+template <>
+struct OptionalCompImpl<>
+{
+  static bool exec(uint64_t templateID)  {return false;}
+};
+} // namespace optional_components_impl
+
+template <typename... RTs>
+bool OptionalComponents(uint64_t templateID)
+{
+  // Recursively determine if any of the given template parameters match the
+  // given templateID.
+  return optional_components_impl::OptionalCompImpl<RTs...>::exec(templateID);
+}
 
 } // namespace CPM_ES_NS
 
