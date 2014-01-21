@@ -79,14 +79,15 @@ public:
   /// fed into each system in the same manner. Use this to make 'global'
   /// components (for lighting, view camera position, input, etc...).
   /// Static components and regular components cannot be mixed.
+  /// Returns the index of the static component.
   template <typename T>
-  void addStaticComponent(const T& component)
+  size_t addStaticComponent(const T& component)
   {
     // If the container isn't already marked as static, mark it and ensure
     // that it is empty.
     BaseComponentContainer* componentContainer = ensureComponentArrayExists<T>();
     ComponentContainer<T>* concreteContainer = dynamic_cast<ComponentContainer<T>*>(componentContainer);
-    concreteContainer->addStaticComponent(component);
+    return concreteContainer->addStaticComponent(component);
   }
 
   /// Retrieves the list of static components. You can modify these values at
@@ -102,13 +103,14 @@ public:
   }
 
   template <typename T>
-  T* getFirstStaticComponent()
+  T* getStaticComponent(int index)
   {
     BaseComponentContainer* componentContainer = ensureComponentArrayExists<T>();
     ComponentContainer<T>* concreteContainer = dynamic_cast<ComponentContainer<T>*>(componentContainer);
     typename ComponentContainer<T>::ComponentItem* components = concreteContainer->getComponentArray();
-    if (components != nullptr)
-      return &components->component;
+    int numComp = concreteContainer->getNumComponents();
+    if (components != nullptr && index < concreteContainer->getNumComponents())
+      return &components[index].component;
     else
       return nullptr;
   }

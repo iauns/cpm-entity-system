@@ -188,12 +188,14 @@ public:
         auto it = mComponents.begin() + mLastSortedSize;
         for (; it != mComponents.end(); ++it)
         {
-          // Construct added components (we need to do this at the end).
+          // Construct added components
           cc_detail::maybe_component_construct(it->component, it->sequence, 0);
         }
 
         // Sort the entire vector (not just to mLastSortedSize).
-        if (!stableSort)
+        // We *always* stable sort static components. This way we guarantee
+        // the correct ordering.
+        if (!stableSort && !isStatic())
           std::sort(mComponents.begin(), mComponents.end(), componentCompare);
         else
           std::stable_sort(mComponents.begin(), mComponents.end(), componentCompare);
@@ -295,7 +297,8 @@ public:
     mComponents.push_back(ComponentItem(sequence, component));
   }
 
-  void addStaticComponent(const T& component)
+  /// Returns the index the static component was added at.
+  size_t addStaticComponent(const T& component)
   {
     if (isStatic() == false)
     {
@@ -304,14 +307,16 @@ public:
         std::cerr << "Cannot add static components to a container that already has";
         std::cerr << " non-static\ncomponents!" << std::endl;
         throw std::runtime_error("Cannot add static components to an entityID component container!");
-        return;
+        return -1;
       }
       else
       {
         setStatic(true);
       }
     }
+    size_t newIndex = mComponents.size();
     mComponents.push_back(ComponentItem(StaticEntID, component));
+    return newIndex;
   }
 
   void removeSequence(uint64_t sequence) override
@@ -361,8 +366,6 @@ public:
   ///       This simple implementation is to just sort mComponents, and copy
   ///       over the sequences. But I don't know if this will help or hurt
   ///       overall performance, so we should look into that later.
-
-  static const int StaticEntID = 1;
 
   enum REMOVAL_TYPE
   {
