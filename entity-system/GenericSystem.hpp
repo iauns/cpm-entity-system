@@ -393,13 +393,16 @@ public:
           // Find the target sequence in the components.
           for (int i = 0; i < baseComponents.size(); ++i)
           {
-            uint64_t curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
-            while (curSequence < targetSequence && indices[i] != numComponents[i])
+            if (!isStatic[i])
             {
-              ++indices[i];
-              if (indices[i] == numComponents[i])
-                break;   // We are done.
-              curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+              uint64_t curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+              while (curSequence < targetSequence && indices[i] != numComponents[i])
+              {
+                ++indices[i];
+                if (indices[i] == numComponents[i])
+                  break;   // We are done.
+                curSequence = baseComponents[i]->getSequenceFromIndex(indices[i]);
+              }
             }
 
             // We are never going to fail finding this sequence in at least one
