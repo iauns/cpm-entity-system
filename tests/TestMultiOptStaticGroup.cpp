@@ -156,11 +156,11 @@ public:
   }
 
   void groupExecute(uint64_t entityID,
-                    const es::ComponentGroup<CompStaticLightDir>& dir,
-                    const es::ComponentGroup<CompPosition>& pos,
-                    const es::ComponentGroup<CompStaticCamera>& cam,
-                    const es::ComponentGroup<CompHomPos>& homPos,
-                    const es::ComponentGroup<CompGameplay>& gp) override
+                    es::ComponentGroup<CompStaticLightDir>& dir,
+                    es::ComponentGroup<CompPosition>& pos,
+                    es::ComponentGroup<CompStaticCamera>& cam,
+                    es::ComponentGroup<CompHomPos>& homPos,
+                    es::ComponentGroup<CompGameplay>& gp) override
   {
     ++numCall;
 

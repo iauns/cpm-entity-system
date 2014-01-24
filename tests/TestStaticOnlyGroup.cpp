@@ -59,8 +59,8 @@ public:
   bool shouldGroupComponents() override                    {return true;}
 
   void groupExecute(uint64_t /* entityID */,
-                    const es::ComponentGroup<CompStaticLightDir>& lightDir,
-                    const es::ComponentGroup<CompStaticCamera>& cam) override
+                    es::ComponentGroup<CompStaticLightDir>& lightDir,
+                    es::ComponentGroup<CompStaticCamera>& cam) override
   {
     ++numCall;
 

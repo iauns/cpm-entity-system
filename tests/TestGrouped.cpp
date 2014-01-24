@@ -111,9 +111,9 @@ public:
   }
 
   void groupExecute(uint64_t entityID, 
-                    const es::ComponentGroup<CompPosition>& pos,
-                    const es::ComponentGroup<CompHomPos>&   homPos,
-                    const es::ComponentGroup<CompGameplay>& gp) override
+                    es::ComponentGroup<CompPosition>& pos,
+                    es::ComponentGroup<CompHomPos>&   homPos,
+                    es::ComponentGroup<CompGameplay>& gp) override
   {
     // Check to see if this entityID should have been executed.
     if (invalidComponents.find(entityID) != invalidComponents.end())
