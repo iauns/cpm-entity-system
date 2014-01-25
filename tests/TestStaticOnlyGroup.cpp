@@ -16,7 +16,7 @@ struct CompStaticLightDir
   CompStaticLightDir() {}
   CompStaticLightDir(const glm::vec3& dir) {lightDir = dir;}
 
-  void checkEqual(const CompStaticLightDir& dir)
+  void checkEqual(const CompStaticLightDir& dir) const
   {
     EXPECT_FLOAT_EQ(lightDir.x, dir.lightDir.x);
     EXPECT_FLOAT_EQ(lightDir.y, dir.lightDir.y);
@@ -36,7 +36,7 @@ struct CompStaticCamera
   CompStaticCamera() : dummy(0)         {}
   CompStaticCamera(int in) : dummy(in)  {}
 
-  void checkEqual(const CompStaticCamera& in)
+  void checkEqual(const CompStaticCamera& in) const
   {
     EXPECT_EQ(in.dummy, dummy);
   }
@@ -59,8 +59,8 @@ public:
   bool shouldGroupComponents() override                    {return true;}
 
   void groupExecute(uint64_t /* entityID */,
-                    es::ComponentGroup<CompStaticLightDir>& lightDir,
-                    es::ComponentGroup<CompStaticCamera>& cam) override
+                    const es::ComponentGroup<CompStaticLightDir>& lightDir,
+                    const es::ComponentGroup<CompStaticCamera>& cam) override
   {
     ++numCall;
 

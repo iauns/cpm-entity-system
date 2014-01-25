@@ -21,7 +21,7 @@ struct CompPosition
   CompPosition() {}
   CompPosition(const glm::vec3& pos) {position = pos;}
 
-  void checkEqual(const CompPosition& pos)
+  void checkEqual(const CompPosition& pos) const
   {
     EXPECT_FLOAT_EQ(position.x, pos.position.x);
     EXPECT_FLOAT_EQ(position.y, pos.position.y);
@@ -53,7 +53,7 @@ struct CompHomPos
   CompHomPos() {}
   CompHomPos(const glm::vec4& pos) {position = pos;}
 
-  void checkEqual(const CompHomPos& pos)
+  void checkEqual(const CompHomPos& pos) const
   {
     EXPECT_FLOAT_EQ(position.x, pos.position.x);
     EXPECT_FLOAT_EQ(position.y, pos.position.y);
@@ -86,7 +86,7 @@ struct CompGameplay
     this->armor = armorIn;
   }
 
-  void checkEqual(const CompGameplay& gp)
+  void checkEqual(const CompGameplay& gp) const
   {
     EXPECT_EQ(health, gp.health);
     EXPECT_EQ(armor, gp.armor);
@@ -140,7 +140,9 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void execute(uint64_t entityID, CompPosition* pos, CompHomPos* homPos, CompGameplay* gp) override
+  void execute(uint64_t entityID,
+               const CompPosition* pos, const CompHomPos* homPos,
+               const CompGameplay* gp) override
   {
     // Check to see if this entityID should have been executed.
     if (invalidComponents.find(entityID) != invalidComponents.end())

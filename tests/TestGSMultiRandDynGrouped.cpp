@@ -32,7 +32,7 @@ struct CompPosition
     position = glm::vec3(drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompPosition* pos)
+  bool checkEqual(const CompPosition* pos) const
   {
     if (pos == nullptr) return false;
     // We do not perform a floating point comparison because we haven't
@@ -43,7 +43,7 @@ struct CompPosition
     return b;
   }
 
-  bool checkEqual(const std::list<CompPosition>* list)
+  bool checkEqual(const std::list<CompPosition>* list) const
   {
     if (list == nullptr) return false;
 
@@ -87,7 +87,7 @@ struct CompHomPos
     position = glm::vec4(drand(), drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompHomPos* pos)
+  bool checkEqual(const CompHomPos* pos) const
   {
     if (pos == nullptr) return false;
     return (position.x == pos->position.x)
@@ -96,7 +96,7 @@ struct CompHomPos
         && (position.w == pos->position.w);
   }
 
-  bool checkEqual(const std::list<CompHomPos>* list)
+  bool checkEqual(const std::list<CompHomPos>* list) const
   {
     if (list == nullptr) return false;
 
@@ -129,14 +129,14 @@ struct CompGameplay
     armor = irand();
   }
 
-  bool checkEqual(const CompGameplay* gp)
+  bool checkEqual(const CompGameplay* gp) const
   {
     if (gp == nullptr) return false;
     return (health == gp->health)
         && (armor == gp->armor);
   }
 
-  bool checkEqual(const std::list<CompGameplay>* list)
+  bool checkEqual(const std::list<CompGameplay>* list) const
   {
     if (list == nullptr) return false;
 
@@ -167,13 +167,13 @@ struct CompTest1
     t1 = irand();
   }
 
-  bool checkEqual(const CompTest1* t)
+  bool checkEqual(const CompTest1* t) const
   {
     if (t == nullptr) return false;
     return (t1 == t->t1);
   }
 
-  bool checkEqual(const std::list<CompTest1>* list)
+  bool checkEqual(const std::list<CompTest1>* list) const
   {
     if (list == nullptr) return false;
 
@@ -196,14 +196,14 @@ struct CompTest2
     t2 = drand();
   }
 
-  bool checkEqual(const CompTest2* t)
+  bool checkEqual(const CompTest2* t) const
   {
     if (t == nullptr) return false;
     return (t1 == t->t1)
         && (t2 == t->t2);
   }
 
-  bool checkEqual(const std::list<CompTest2>* list)
+  bool checkEqual(const std::list<CompTest2>* list) const
   {
     if (list == nullptr) return false;
 
@@ -227,7 +227,7 @@ struct CompTest3
     v4 = glm::vec4(drand(), drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompTest3* t)
+  bool checkEqual(const CompTest3* t) const
   {
     if (t == nullptr) return false;
     return (v3.x == t->v3.x)
@@ -239,7 +239,7 @@ struct CompTest3
         && (v4.w == t->v4.w);
   }
 
-  bool checkEqual(const std::list<CompTest3>* list)
+  bool checkEqual(const std::list<CompTest3>* list) const
   {
     if (list == nullptr) return false;
 
@@ -504,7 +504,7 @@ public:
     return totalNumExecutions;
   }
 
-  void groupExecute(uint64_t entityID, es::ComponentGroup<Ts>&... groups) override
+  void groupExecute(uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
   {
     executedItems.push_back(entityID);
     ++numExecutions;
@@ -574,7 +574,7 @@ public:
     }
   };
 
-  void execute(uint64_t /*entityID*/, Ts*... /*args*/)
+  void execute(uint64_t /*entityID*/, const Ts*... /*args*/)
   {
     ASSERT_EQ(true, false) << "Should not got here! Executing as a group, not a tree!" << std::endl;
   }

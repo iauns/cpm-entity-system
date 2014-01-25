@@ -16,7 +16,7 @@ struct CompStaticLightDir
   CompStaticLightDir() {}
   CompStaticLightDir(const glm::vec3& dir) {lightDir = dir;}
 
-  void checkEqual(const CompStaticLightDir& dir)
+  void checkEqual(const CompStaticLightDir& dir) const
   {
     EXPECT_FLOAT_EQ(lightDir.x, dir.lightDir.x);
     EXPECT_FLOAT_EQ(lightDir.y, dir.lightDir.y);
@@ -36,7 +36,7 @@ struct CompStaticCamera
   CompStaticCamera() : dummy(0)         {}
   CompStaticCamera(int in) : dummy(in)  {}
 
-  void checkEqual(const CompStaticCamera& in)
+  void checkEqual(const CompStaticCamera& in) const
   {
     EXPECT_EQ(in.dummy, dummy);
   }
@@ -56,7 +56,7 @@ public:
 
   static int numCall;
 
-  void execute(uint64_t /* entityID */, CompStaticLightDir* dir, CompStaticCamera* cam) override
+  void execute(uint64_t /* entityID */, const CompStaticLightDir* dir, const CompStaticCamera* cam) override
   {
     ++numCall;
 

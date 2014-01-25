@@ -16,7 +16,7 @@ struct CompPosition
   CompPosition() {}
   CompPosition(const glm::vec3& pos) {position = pos;}
 
-  void checkEqual(const CompPosition& pos)
+  void checkEqual(const CompPosition& pos) const
   {
     EXPECT_FLOAT_EQ(position.x, pos.position.x);
     EXPECT_FLOAT_EQ(position.y, pos.position.y);
@@ -32,7 +32,7 @@ struct CompHomPos
   CompHomPos() {}
   CompHomPos(const glm::vec4& pos) {position = pos;}
 
-  void checkEqual(const CompHomPos& pos)
+  void checkEqual(const CompHomPos& pos) const
   {
     EXPECT_FLOAT_EQ(position.x, pos.position.x);
     EXPECT_FLOAT_EQ(position.y, pos.position.y);
@@ -53,7 +53,7 @@ struct CompGameplay
     this->armor = armorIn;
   }
 
-  void checkEqual(const CompGameplay& gp)
+  void checkEqual(const CompGameplay& gp) const
   {
     EXPECT_EQ(health, gp.health);
     EXPECT_EQ(armor, gp.armor);
@@ -69,7 +69,7 @@ struct CompStaticLightDir
   CompStaticLightDir() {}
   CompStaticLightDir(const glm::vec3& dir) {lightDir = dir;}
 
-  void checkEqual(const CompStaticLightDir& dir)
+  void checkEqual(const CompStaticLightDir& dir) const
   {
     EXPECT_FLOAT_EQ(lightDir.x, dir.lightDir.x);
     EXPECT_FLOAT_EQ(lightDir.y, dir.lightDir.y);
@@ -88,7 +88,7 @@ struct CompStaticCamera
   CompStaticCamera() : dummy(0)         {}
   CompStaticCamera(int in) : dummy(in)  {}
 
-  void checkEqual(const CompStaticCamera& in)
+  void checkEqual(const CompStaticCamera& in) const
   {
     EXPECT_EQ(in.dummy, dummy);
   }
@@ -150,8 +150,8 @@ public:
     return es::OptionalComponents<CompHomPos, CompPosition>(templateID);
   }
 
-  void execute(uint64_t entityID, CompStaticLightDir* dir, CompPosition* pos, 
-               CompStaticCamera* cam, CompHomPos* homPos, CompGameplay* gp) override
+  void execute(uint64_t entityID, const CompStaticLightDir* dir, const CompPosition* pos, 
+               const CompStaticCamera* cam, const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCall;
 

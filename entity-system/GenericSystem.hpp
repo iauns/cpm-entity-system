@@ -887,8 +887,8 @@ public:
 
   /// Derived classes should implement one of the two following functions,
   /// depending on if shouldGroupComponents is true or false.
-  virtual void execute(uint64_t entityID, Ts*... vs)                          {}
-  virtual void groupExecute(uint64_t entityID, ComponentGroup<Ts>&... groups)  {}
+  virtual void execute(uint64_t entityID, const Ts*... vs)                          {}
+  virtual void groupExecute(uint64_t entityID, const ComponentGroup<Ts>&... groups)  {}
 
   /// Override and return true from this function if you want grouped components
   /// fed into groupExecute, instead of individual components fed into execute.

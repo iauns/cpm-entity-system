@@ -28,7 +28,7 @@ struct CompPosition
     position = glm::vec3(drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompPosition* pos)
+  bool checkEqual(const CompPosition* pos) const
   {
     if (pos == nullptr) return false;
     return (position.x == pos->position.x)
@@ -48,7 +48,7 @@ struct CompHomPos
     position = glm::vec4(drand(), drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompHomPos* pos)
+  bool checkEqual(const CompHomPos* pos) const
   {
     if (pos == nullptr) return false;
     return (position.x == pos->position.x)
@@ -70,7 +70,7 @@ struct CompGameplay
     armor = irand();
   }
 
-  bool checkEqual(const CompGameplay* gp)
+  bool checkEqual(const CompGameplay* gp) const
   {
     if (gp == nullptr) return false;
     return (health == gp->health)
@@ -90,7 +90,7 @@ struct CompTest1
     t1 = irand();
   }
 
-  bool checkEqual(const CompTest1* t)
+  bool checkEqual(const CompTest1* t) const
   {
     if (t == nullptr) return false;
     return (t1 == t->t1);
@@ -109,7 +109,7 @@ struct CompTest2
     t2 = drand();
   }
 
-  bool checkEqual(const CompTest2* t)
+  bool checkEqual(const CompTest2* t) const
   {
     if (t == nullptr) return false;
     return (t1 == t->t1)
@@ -129,7 +129,7 @@ struct CompTest3
     v4 = glm::vec4(drand(), drand(), drand(), drand());
   }
 
-  bool checkEqual(const CompTest3* t)
+  bool checkEqual(const CompTest3* t) const
   {
     if (t == nullptr) return false;
     return (v3.x == t->v3.x)
@@ -212,7 +212,7 @@ template <typename... Ts>
 class TestSystem : public es::GenericSystem<Ts...>
 {
 public:
-  void execute(uint64_t entityID, Ts*... args)
+  void execute(uint64_t entityID, const Ts*... args)
   {
     // Detect any failed components that should not be tested.
     std::array<bool, sizeof...(Ts)> detectFailures = {{
