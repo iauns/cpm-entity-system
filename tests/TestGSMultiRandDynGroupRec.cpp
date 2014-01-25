@@ -467,7 +467,7 @@ struct ComponentItem
 template <typename T> ComponentItem<T>* ComponentItem<T>::mInstance = nullptr;
 
 template <typename... Ts>
-class TestSystem : public es::GenericSystem<Ts...>
+class TestSystem : public es::GenericSystem<false, Ts...>
 {
 public:
 

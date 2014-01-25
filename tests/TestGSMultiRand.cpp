@@ -209,7 +209,7 @@ struct ComponentItem
 template <typename T> ComponentItem<T>* ComponentItem<T>::mInstance = nullptr;
 
 template <typename... Ts>
-class TestSystem : public es::GenericSystem<Ts...>
+class TestSystem : public es::GenericSystem<false, Ts...>
 {
 public:
   void execute(uint64_t entityID, const Ts*... args)

@@ -130,7 +130,7 @@ std::vector<CompGameplay> gameplayComponents = {
 
 // This basic system will apply, every frame, to entities with the CompPosition,
 // CompHomPos, and CompGameplay components.
-class BasicSystem : public es::GenericSystem<CompStaticLightDir, CompPosition, 
+class BasicSystem : public es::GenericSystem<false, CompStaticLightDir, CompPosition, 
                                              CompStaticCamera, CompHomPos, CompGameplay>
 {
 public:

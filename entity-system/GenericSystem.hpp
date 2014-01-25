@@ -163,7 +163,7 @@ template< class ...T >struct is_unique : is_unique_impl< empty, T ... > {};
 
 /// Base class implementation of generic system. You do not need instances of
 /// this class in order to use it. All important functions are static.
-template <typename... Ts>
+template <bool GroupComponents, typename... Ts>
 class GenericSystem : public BaseSystem
 {
 public:
@@ -181,8 +181,6 @@ public:
     ///       if we make the component container a flat array.
     if (sizeof...(Ts) == 0)
       return false;
-
-    bool group = shouldGroupComponents();
 
     // Ensure all component containers have been created.
     // Even if a component cointainer is empty doesn't mean that it is not
@@ -227,7 +225,7 @@ public:
 
     if (execute)
     {
-      if (group == false)
+      if (GroupComponents == false)
         RecurseExecute<0, Ts...>::exec(this, componentArrays, numComponents,
                                        indices, optionalComponents, isStatic,
                                        nextIndices, values, entityID);
@@ -259,11 +257,6 @@ public:
     // Even if a component cointainer is empty doesn't mean that it is not
     // associated with an optional component.
     gs_detail::init_impl<Ts...>::ensureContainersPresent(&core);
-
-    // Determine if we should group components together, or execute them
-    // in a recursive manner. Component grouping calls a different derived
-    // function.
-    bool group = shouldGroupComponents();
 
     /// \todo Remove excess calls to getComponentContainer. There should only
     ///       be one call made to getComponentContainer. Also think about
@@ -378,7 +371,7 @@ public:
         {
           // Execute with indices. This recursive execute will perform a cartesian
           // product.
-          if (group == false)
+          if (GroupComponents == false)
           {
             if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
                                                 numComponents, indices, 
@@ -467,7 +460,7 @@ public:
 
           // Execute with indices. This recursive execute will perform a cartesian
           // product.
-          if (group == false)
+          if (GroupComponents == false)
           {
             if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
                                                 numComponents, indices, 
@@ -513,7 +506,7 @@ public:
 
         if (allStatic)
         {
-          if (group == false)
+          if (GroupComponents == false)
           {
             if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
                                                 numComponents, indices, 
@@ -614,7 +607,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct RecurseExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(GenericSystem<Ts...>* ptr,
+    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -746,7 +739,7 @@ public:
   template <int TupleIndex>
   struct RecurseExecute<TupleIndex>
   {
-    static bool exec(GenericSystem<Ts...>* ptr,
+    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -757,7 +750,7 @@ public:
                      uint64_t targetSequence)
     {
       // Call our execute function with 'targetSequence' and 'input'.
-      gs_detail::call(targetSequence, ptr, &GenericSystem<Ts...>::execute, input);
+      gs_detail::call(targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::execute, input);
       return true;
     }
   };
@@ -768,7 +761,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct GroupExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(GenericSystem<Ts...>* ptr,
+    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -868,7 +861,7 @@ public:
   template <int TupleIndex>
   struct GroupExecute<TupleIndex>
   {
-    static bool exec(GenericSystem<Ts...>* ptr,
+    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -879,7 +872,7 @@ public:
                      uint64_t targetSequence)
     {
       // Call our execute function with 'targetSequence' and 'input'.
-      gs_detail::call(targetSequence, ptr, &GenericSystem<Ts...>::groupExecute, input);
+      gs_detail::call(targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::groupExecute, input);
       return true;
     }
   };

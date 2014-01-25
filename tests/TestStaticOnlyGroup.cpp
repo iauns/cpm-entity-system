@@ -50,7 +50,7 @@ std::vector<CompStaticCamera> cameras = {
 
 // This basic system will apply, every frame, to entities with the CompPosition,
 // CompHomPos, and CompGameplay components.
-class BasicSystem : public es::GenericSystem<CompStaticLightDir, CompStaticCamera>
+class BasicSystem : public es::GenericSystem<true, CompStaticLightDir, CompStaticCamera>
 {
 public:
 
