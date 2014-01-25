@@ -16,6 +16,12 @@
 #include "src/ComponentContainer.hpp"
 #include "src/TemplateID.hpp"
 
+/// \todo Add boolean to template parameter list which specifies whether
+///       we use a group iteration or a recursive iteration. This should allow
+///       the compiler to optimize out code in each circumstance.
+///       We can use enable_if to remove virtual functions and cause a
+///       compiler error too...
+
 namespace CPM_ES_NS {
 
 // Simple structure to group like components (components belonging to the
@@ -23,8 +29,50 @@ namespace CPM_ES_NS {
 template <typename T>
 struct ComponentGroup
 {
-  size_t numComponents;
+  size_t numComponents;   ///< Number of components in this group.
   typename ComponentContainer<T>::ComponentItem* components;
+
+  size_t size() const
+  {
+    return numComponents;
+  }
+
+  const T* front() const
+  {
+    if (numComponents != 0) components->component;
+    else nullptr;
+  }
+
+  const T* back() const
+  {
+    if (numComponents != 0)  components[numComponents].component;
+    else nullptr;
+  }
+
+  const typename ComponentContainer<T>::ComponentItem& begin() const
+  {
+    return *components;
+  }
+
+  const typename ComponentContainer<T>::ComponentItem& end() const
+  {
+    return components[numComponents];
+  }
+
+  void modify(const T& val, size_t componentNum = 0, int priority = 1) const
+  {
+    // Modify value by storing index, in raw array, to modified component.
+    // This index will be used when re-integrating changes made at the end
+    // of the frame.
+    container->modifyIndex(val, containerIndex + componentNum, priority);
+  }
+
+  // The following two variables are only used when modify is called. Used
+  // to modify the value of the component.
+  size_t containerIndex;
+  ComponentContainer<T>* container;
+
+  /// \todo Overload [] operator to return indivdual components.
 };
 
 namespace gs_detail
@@ -265,8 +313,10 @@ public:
         dynamic_cast<ComponentContainer<Ts>*>(
             core.getComponentContainer(TemplateID<Ts>::getID()))->getComponentArray()...);
 
-    std::tuple<Ts*...> values;                    ///< Values that will be passed into execute.
+    std::tuple<Ts*...> values;                      ///< Values that will be passed into execute.
     std::tuple<ComponentGroup<Ts>...> groupValues;  ///< Grouped values that will be passed into group execute.
+
+    AddComponentsToGroupInputs<0, Ts...>::exec(core, groupValues);
 
     // leadingComponent == -1 if and only if the number of optional and static
     // components == sizeof...(Ts). Because the if statement following the
@@ -293,7 +343,7 @@ public:
           // Static components don't have associated sequences.
           // They are always at index 0 and always valid. Existance of some
           // static components were guaranteed above.
-          if (!compStatic)  
+          if (!compStatic)
           {
             // Note: when indices[i] = numComponents[i], we necessarily have an
             // optional component. This is because of the check for a zero number
@@ -539,6 +589,26 @@ public:
   };
 
   template <int TupleIndex, typename... RTs>
+  struct AddComponentsToGroupInputs;
+
+  template <int TupleIndex, typename RT, typename... RTs>
+  struct AddComponentsToGroupInputs<TupleIndex, RT, RTs...>
+  {
+    static void exec(ESCore& core, std::tuple<ComponentGroup<Ts>...>& input)
+    {
+      std::get<TupleIndex>(input).container 
+          = dynamic_cast<ComponentContainer<RT>*>(core.getComponentContainer(TemplateID<RT>::getID()));
+      AddComponentsToGroupInputs<TupleIndex + 1, RTs...>::exec(core, input);
+    }
+  };
+
+  template <int TupleIndex>
+  struct AddComponentsToGroupInputs<TupleIndex>
+  {
+    static void exec(ESCore& /* core */, std::tuple<ComponentGroup<Ts>...>& /* input */) {}
+  };
+
+  template <int TupleIndex, typename... RTs>
   struct RecurseExecute;
 
   template <int TupleIndex, typename RT, typename... RTs>
@@ -714,6 +784,8 @@ public:
       bool isStatic     = componentStatic[TupleIndex];
       typename ComponentContainer<RT>::ComponentItem* array = std::get<TupleIndex>(componentArrays);
       bool endOfArray   = false;
+
+      std::get<TupleIndex>(input).containerIndex = currentIndex;
 
       // Check to see if we are at the end of the array. This will happen with
       // optional components. Static components will never enter this case.

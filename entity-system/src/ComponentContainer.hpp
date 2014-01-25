@@ -84,6 +84,10 @@ public:
       this->sequence = seq;
       this->component = comp;
     }
+
+    /// \todo Overload * operator to retrieve component. This is so we mimic
+    ///       STL containers almost completely.
+
     uint64_t  sequence;   ///< Commonly used element in the first cacheline.
     T         component;  ///< Copy constructable component data.
   };
@@ -170,6 +174,9 @@ public:
   /// The same set of data is acted upon by all systems.
   void renormalize(bool stableSort) override
   {
+    // Changes should come FIRST. Changes rely on direct indices to values.
+    // No additions or removals should come before modifications.
+
     // Removals should come *after* addition of new components. This keeps
     // logic consistent within one frame in an entire entity was removed.
     // If an entity was adding components to itself, then subsequently deleted,
@@ -177,6 +184,37 @@ public:
     // first. But, adding before removal has no side effects, especially if
     // stable sort is used. Then removal from the beginning or end of the list
     // is guaranteed to be consistent.
+
+    if (mModifications.size() > 0)
+    {
+      // Sort modifications to maintain some semblance of cache friendliness
+      // and to detect modification conflicts and resolve with priority.
+      // Stable sort is not needed, a priority is used to determine who
+      // resolves the modifications.
+      std::sort(mModifications.begin(), mModifications.end(), modificationCompare);
+
+      // Simple iteration through the modifications to apply them to our
+      // components.
+      size_t attemptIdx = 0;
+      size_t numMods = mModifications.size();
+      for (; attemptIdx != numMods;)
+      {
+        size_t resolvedIndex = attemptIdx;
+        while (   (attemptIdx + 1) != numMods 
+               && mModifications[attemptIdx + 1].componentIndex == mModifications[resolvedIndex].componentIndex)
+        {
+          ++attemptIdx;
+          if (mModifications[attemptIdx].priority > mModifications[resolvedIndex].priority)
+            resolvedIndex = attemptIdx;
+        }
+
+        // Now we have 1 fully resolved modification.
+        mComponents[mModifications[resolvedIndex].componentIndex].component = mModifications[resolvedIndex].value;
+      }
+
+      // Clear all modifications.
+      mModifications.clear();
+    }
 
     // Check to see if components were added. If so, then sort them into
     // our vector.
@@ -344,6 +382,11 @@ public:
       return nullptr;
   }
 
+  void modifyIndex(const T& val, size_t index)
+  {
+    mModifications.emplace_back(val, index);
+  }
+
   /// Retrieves the active size of the vector backing this component container.
   /// Used only for debugging purposes (see addStaticComponent in ESCore).
   size_t getSizeOfBackingContainer()  {return mComponents.size();}
@@ -385,9 +428,29 @@ public:
     REMOVAL_TYPE  removeType;
   };
 
-  std::vector<ComponentItem>  mComponents;  ///< All components currently in the system.
-  std::vector<RemovalItem>    mRemovals;    ///< A list of objects to remove during
-                                            ///< renormalization.
+  struct ModificationItem
+  {
+    ModificationItem(const T& val, size_t idx, int pri) :
+        value(val),
+        componentIndex(idx),
+        priority(pri)
+    {}
+
+    T value;
+    size_t componentIndex; 
+    int priority;
+  };
+
+  static bool modificationCompare(const ModificationItem& a, const ModificationItem& b)
+  {
+    return a.componentIndex < b.componentIndex;
+  }
+
+  std::vector<ComponentItem>    mComponents;    ///< All components currently in the system.
+  std::vector<RemovalItem>      mRemovals;      ///< An array of objects to remove during
+                                                ///< renormalization.
+  std::vector<ModificationItem> mModifications; ///< An array of objects whose values need
+                                                ///< to be updated during renormalization.
 };
 
 } // namespace CPM_ES_NS 
