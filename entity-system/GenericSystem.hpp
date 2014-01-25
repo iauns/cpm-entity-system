@@ -16,12 +16,6 @@
 #include "src/ComponentContainer.hpp"
 #include "src/TemplateID.hpp"
 
-/// \todo Add boolean to template parameter list which specifies whether
-///       we use a group iteration or a recursive iteration. This should allow
-///       the compiler to optimize out code in each circumstance.
-///       We can use enable_if to remove virtual functions and cause a
-///       compiler error too...
-
 namespace CPM_ES_NS {
 
 // Simple structure to group like components (components belonging to the
@@ -877,11 +871,27 @@ public:
     }
   };
 
+  /// \todo Figure out how to get the compiler to issue an error if either of
+  ///       these functions is unimplemented. We could do this with template
+  ///       specialization on GroupComponents, but that would be a lot of
+  ///       code reuse. We could also make generic system accept a class
+  ///       which it will inspect to see if it has the appropriate methods.
+  ///       Neither sounds good (until something like N3596 is adopted).
+  ///       So we opt for a runtime exception instead.
 
-  /// Derived classes should implement one of the two following functions,
-  /// depending on if shouldGroupComponents is true or false.
-  virtual void execute(uint64_t entityID, const Ts*... vs)                          {}
-  virtual void groupExecute(uint64_t entityID, const ComponentGroup<Ts>&... groups)  {}
+  // Non-grouped version of execute.
+  virtual void execute(uint64_t entityID, const Ts*... vs)
+  {
+    std::cerr << "cpm-entity-system: Unimplmented system execute." << std::endl;
+    throw std::runtime_error("cpm-entity-system: Unimplemented system execute.");
+  }
+
+  // Grouped version of execute.
+  virtual void groupExecute(uint64_t entityID, const ComponentGroup<Ts>&... groups)
+  {
+    std::cerr << "cpm-entity-system: Unimplmented system group execute." << std::endl;
+    throw std::runtime_error("cpm-entity-system: Unimplemented system group execute.");
+  }
 
   /// Override and return true from this function if you want grouped components
   /// fed into groupExecute, instead of individual components fed into execute.
