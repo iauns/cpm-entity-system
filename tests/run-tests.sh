@@ -9,8 +9,10 @@ fi
 set -e
 
 pushd ./bin > /dev/null
-  cmake -DCMAKE_BUILD_TYPE=Debug ..
-  #cmake -DCMAKE_BUILD_TYPE=Release ..
+  if [[ ! "-n" == $1 ]]; then
+    #cmake -DCMAKE_BUILD_TYPE=Debug ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+  fi
   make -j4
   ./entity_system_tests
 popd

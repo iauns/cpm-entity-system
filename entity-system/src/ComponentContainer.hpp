@@ -209,7 +209,15 @@ public:
         }
 
         // Now we have 1 fully resolved modification.
-        mComponents[mModifications[resolvedIndex].componentIndex].component = mModifications[resolvedIndex].value;
+        if (mModifications[resolvedIndex].componentIndex < mComponents.size())
+        {
+          mComponents[mModifications[resolvedIndex].componentIndex].component = mModifications[resolvedIndex].value;
+        }
+        else
+        {
+          std::cerr << "cpm-entity-system - renormalize: Bad index!" << std::endl;
+        }
+        ++attemptIdx;
       }
 
       // Clear all modifications.
@@ -252,54 +260,57 @@ public:
     }
 
     // Perform requested removals.
-    ComponentItem item;
-    for (RemovalItem& rem : mRemovals)
+    if (mRemovals.size() > 0)
     {
-      auto last = mComponents.begin() + mLastSortedSize;
-      item.sequence = rem.sequence;
-      auto it = std::lower_bound(mComponents.begin(), last, item,
-                                 componentCompare);
-
-      if (rem.removeType == REMOVE_ALL)
+      ComponentItem item;
+      for (RemovalItem& rem : mRemovals)
       {
-        while (it != mComponents.end() && it->sequence == rem.sequence)
+        auto last = mComponents.begin() + mLastSortedSize;
+        item.sequence = rem.sequence;
+        auto it = std::lower_bound(mComponents.begin(), last, item,
+                                   componentCompare);
+
+        if (rem.removeType == REMOVE_ALL)
         {
+          while (it != mComponents.end() && it->sequence == rem.sequence)
+          {
+            // Call components destructor (we need to do this at the end).
+            cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+
+            it = mComponents.erase(it);
+            --mLastSortedSize;
+          }
+        }
+        else if (rem.removeType == REMOVE_LAST)
+        {
+          auto priorIt = it;
+          if (it != mComponents.end()) ++it;
+          while (it != mComponents.end() && it->sequence == rem.sequence)
+          {
+            priorIt = it;
+            ++it;
+          }
+
           // Call components destructor (we need to do this at the end).
-          cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
-
-          it = mComponents.erase(it);
-          --mLastSortedSize;
+          if (priorIt != mComponents.end() && priorIt->sequence == rem.sequence)
+          {
+            cc_detail::maybe_component_destruct(priorIt->component, rem.sequence, 0);
+            priorIt = mComponents.erase(priorIt);
+            --mLastSortedSize;
+          }
+        }
+        else // if (rem.removeType == REMOVE_FIRST)
+        {
+          if (it != mComponents.end() && it->sequence == rem.sequence)
+          {
+            cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+            it = mComponents.erase(it);
+            --mLastSortedSize;
+          }
         }
       }
-      else if (rem.removeType == REMOVE_LAST)
-      {
-        auto priorIt = it;
-        if (it != mComponents.end()) ++it;
-        while (it != mComponents.end() && it->sequence == rem.sequence)
-        {
-          priorIt = it;
-          ++it;
-        }
-
-        // Call components destructor (we need to do this at the end).
-        if (priorIt != mComponents.end() && priorIt->sequence == rem.sequence)
-        {
-          cc_detail::maybe_component_destruct(priorIt->component, rem.sequence, 0);
-          priorIt = mComponents.erase(priorIt);
-          --mLastSortedSize;
-        }
-      }
-      else // if (rem.removeType == REMOVE_FIRST)
-      {
-        if (it != mComponents.end() && it->sequence == rem.sequence)
-        {
-          cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
-          it = mComponents.erase(it);
-          --mLastSortedSize;
-        }
-      }
+      mRemovals.clear();
     }
-    mRemovals.clear();
   }
 
   /// Get the least sequence held by the component.
@@ -382,9 +393,9 @@ public:
       return nullptr;
   }
 
-  void modifyIndex(const T& val, size_t index)
+  void modifyIndex(const T& val, size_t index, int priority)
   {
-    mModifications.emplace_back(val, index);
+    mModifications.emplace_back(val, index, priority);
   }
 
   /// Retrieves the active size of the vector backing this component container.
