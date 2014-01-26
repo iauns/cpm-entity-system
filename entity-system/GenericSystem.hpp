@@ -19,7 +19,7 @@
 namespace CPM_ES_NS {
 
 // Simple structure to group like components (components belonging to the
-// same entity). Used when shouldGroupComponents returns true.
+// same entity). Used when the ComponentGroup template parameter is true.
 template <typename T>
 struct ComponentGroup
 {
@@ -892,12 +892,6 @@ public:
     std::cerr << "cpm-entity-system: Unimplmented system group execute." << std::endl;
     throw std::runtime_error("cpm-entity-system: Unimplemented system group execute.");
   }
-
-  /// Override and return true from this function if you want grouped components
-  /// fed into groupExecute, instead of individual components fed into execute.
-  /// If you don't use grouped components, all possible combinations of 
-  /// components will be fed to execute if there are multiple components.
-  virtual bool shouldGroupComponents()                    {return false;}
 
   /// This function should be overriden and return true for all components
   /// which may be optional.

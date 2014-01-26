@@ -139,7 +139,6 @@ public:
   static std::map<uint64_t, bool> invalidComponents;
 
   bool isComponentOptional(uint64_t /* templateID */) {return true;}
-  bool shouldGroupComponents()                        {return true;}
 
   void groupExecute(uint64_t entityID,
                     const es::ComponentGroup<CompStaticLightDir>& dir,

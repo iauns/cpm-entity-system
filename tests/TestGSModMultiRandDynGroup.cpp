@@ -558,9 +558,6 @@ public:
   DoubleRandFun mDRand;
   IntRandFun    mGen100;
 
-  // This test system will group its components.
-  bool shouldGroupComponents() override {return true;}
-
   // Calculate the number of executions required for this system, based on the
   // number of current entities and components.
   uint64_t getNumRecursiveExecutions()

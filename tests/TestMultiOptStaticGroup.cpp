@@ -150,11 +150,6 @@ public:
     return es::OptionalComponents<CompHomPos, CompPosition>(templateID);
   }
 
-  bool shouldGroupComponents()
-  {
-    return true;
-  }
-
   void groupExecute(uint64_t entityID,
                     const es::ComponentGroup<CompStaticLightDir>& dir,
                     const es::ComponentGroup<CompPosition>& pos,

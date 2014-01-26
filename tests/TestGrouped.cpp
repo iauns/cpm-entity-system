@@ -103,8 +103,6 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  bool shouldGroupComponents() override                    {return true;}
-
   void execute(uint64_t /*entityID*/, const CompPosition* /*pos*/, 
                const CompHomPos* /* homPos */, const CompGameplay* /* gp */) override
   {
