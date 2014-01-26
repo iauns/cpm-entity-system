@@ -114,8 +114,8 @@ public:
     ++postWalkCalls;
   }
 
-  void execute(uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
-               const CompGameplay* gp) override
+  void execute(es::ESCore&, uint64_t entityID, const CompPosition* pos, 
+               const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCalls;
 

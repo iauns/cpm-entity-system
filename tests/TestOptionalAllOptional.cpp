@@ -112,8 +112,8 @@ public:
     return true;
   }
 
-  void execute(uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
-               const CompGameplay* gp) override
+  void execute(es::ESCore&, uint64_t entityID, const CompPosition* pos,
+               const CompHomPos* homPos, const CompGameplay* gp) override
   {
     if (pos == nullptr) ++posNull;
     else {pos->checkEqual(posComponents[entityID]); ++posCall;}

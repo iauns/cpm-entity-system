@@ -56,7 +56,7 @@ public:
 
   static int numCall;
 
-  void groupExecute(uint64_t /* entityID */,
+  void groupExecute(es::ESCore&, uint64_t /* entityID */,
                     const es::ComponentGroup<CompStaticLightDir>& lightDir,
                     const es::ComponentGroup<CompStaticCamera>& cam) override
   {

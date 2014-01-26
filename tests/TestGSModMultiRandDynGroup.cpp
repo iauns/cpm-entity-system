@@ -588,7 +588,7 @@ public:
     return totalNumExecutions;
   }
 
-  void groupExecute(uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
+  void groupExecute(es::ESCore&, uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
   {
     executedItems.push_back(entityID);
     ++numExecutions;
@@ -694,11 +694,6 @@ public:
       return -1;
     }
   };
-
-  void execute(uint64_t /*entityID*/, const Ts*... /*args*/)
-  {
-    ASSERT_EQ(true, false) << "Should not got here! Executing as a group, not a tree!" << std::endl;
-  }
 
   // Run through all items that should have been executed and make sure they
   // were in our executed list.

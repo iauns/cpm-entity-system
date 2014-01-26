@@ -100,7 +100,7 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void execute(uint64_t entityID,
+  void execute(es::ESCore&, uint64_t entityID,
                const CompPosition* pos, const CompHomPos* homPos,
                const CompGameplay* gp) override
   {

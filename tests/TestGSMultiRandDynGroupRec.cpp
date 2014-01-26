@@ -507,7 +507,7 @@ public:
     return totalNumExecutions;
   }
 
-  void execute(uint64_t entityID, const Ts*... args)
+  void execute(es::ESCore&, uint64_t entityID, const Ts*... args)
   {
     executedItems.push_back(entityID);
     ++numExecutions;

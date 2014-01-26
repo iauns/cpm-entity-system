@@ -76,30 +76,30 @@ namespace gs_detail
 template <typename C, typename F, typename Tuple, bool Done, int Total, int... N>
 struct call_impl
 {
-  static void call(uint64_t sequence, C c, F f, Tuple && t)
+  static void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
   {
-    call_impl<C, F, Tuple, Total == 1 + sizeof...(N), Total, N..., sizeof...(N)>::call(sequence, c, f, std::forward<Tuple>(t));
+    call_impl<C, F, Tuple, Total == 1 + sizeof...(N), Total, N..., sizeof...(N)>::call(core, sequence, c, f, std::forward<Tuple>(t));
   }
 };
 
 template <typename C, typename F, typename Tuple, int Total, int... N>
 struct call_impl<C, F, Tuple, bool(true), Total, N...>
 {
-  static void call(uint64_t sequence, C c, F f, Tuple && t)
+  static void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
   {
     // Call the variadic member function (c.*f) with expanded template
     // parameter list (std::get<N>(std::forward<Tuple>(t))...).
-    (c->*f)(sequence, std::get<N>(std::forward<Tuple>(t))...);
+    (c->*f)(core, sequence, std::get<N>(std::forward<Tuple>(t))...);
   }
 };
 
 /// C = class type, F = function type.
 /// c = class instance, f = member function pointer.
 template <typename C, typename F, typename Tuple>
-void call(uint64_t sequence, C c, F f, Tuple && t)
+void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
 {
   typedef typename std::decay<Tuple>::type ttype;
-  call_impl<C, F, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::call(sequence, c, f, std::forward<Tuple>(t));
+  call_impl<C, F, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::call(core, sequence, c, f, std::forward<Tuple>(t));
 }
 
 
@@ -220,11 +220,11 @@ public:
     if (execute)
     {
       if (GroupComponents == false)
-        RecurseExecute<0, Ts...>::exec(this, componentArrays, numComponents,
+        RecurseExecute<0, Ts...>::exec(core, this, componentArrays, numComponents,
                                        indices, optionalComponents, isStatic,
                                        nextIndices, values, entityID);
       else
-        GroupExecute<0, Ts...>::exec(this, componentArrays, numComponents,
+        GroupExecute<0, Ts...>::exec(core, this, componentArrays, numComponents,
                                      indices, optionalComponents, isStatic,
                                      nextIndices, groupValues, entityID);
       return true;
@@ -367,7 +367,7 @@ public:
           // product.
           if (GroupComponents == false)
           {
-            if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
+            if (!RecurseExecute<0, Ts...>::exec(core, this, componentArrays, 
                                                 numComponents, indices, 
                                                 optionalComponents, isStatic,
                                                 nextIndices, values,
@@ -378,7 +378,7 @@ public:
           }
           else
           {
-            if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
+            if (!GroupExecute<0, Ts...>::exec(core, this, componentArrays,
                                               numComponents, indices,
                                               optionalComponents, isStatic,
                                               nextIndices, groupValues,
@@ -456,7 +456,7 @@ public:
           // product.
           if (GroupComponents == false)
           {
-            if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
+            if (!RecurseExecute<0, Ts...>::exec(core, this, componentArrays, 
                                                 numComponents, indices, 
                                                 optionalComponents, isStatic,
                                                 nextIndices, values,
@@ -467,7 +467,7 @@ public:
           }
           else
           {
-            if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
+            if (!GroupExecute<0, Ts...>::exec(core, this, componentArrays,
                                               numComponents, indices,
                                               optionalComponents, isStatic,
                                               nextIndices, groupValues,
@@ -502,7 +502,7 @@ public:
         {
           if (GroupComponents == false)
           {
-            if (!RecurseExecute<0, Ts...>::exec(this, componentArrays, 
+            if (!RecurseExecute<0, Ts...>::exec(core, this, componentArrays, 
                                                 numComponents, indices, 
                                                 optionalComponents, isStatic,
                                                 nextIndices, values,
@@ -513,7 +513,7 @@ public:
           }
           else
           {
-            if (!GroupExecute<0, Ts...>::exec(this, componentArrays,
+            if (!GroupExecute<0, Ts...>::exec(core, this, componentArrays,
                                               numComponents, indices,
                                               optionalComponents, isStatic,
                                               nextIndices, groupValues,
@@ -601,7 +601,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct RecurseExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -656,7 +656,7 @@ public:
       // Depth first this will perform one execution with the target sequence
       // we found.
       bool reachedEnd = false;
-      if (!RecurseExecute<TupleIndex + 1, RTs...>::exec(ptr,
+      if (!RecurseExecute<TupleIndex + 1, RTs...>::exec(core, ptr,
               componentArrays, componentSizes, indices, componentOptional,
               componentStatic, nextIndices, input, targetSequence))
       {
@@ -691,7 +691,7 @@ public:
           // We don't need to check return value of RecurseExecute since any
           // lower component would have returned false on the first call. The
           // result of the first call is cached in reachedEnd.
-          RecurseExecute<TupleIndex + 1, RTs...>::exec(
+          RecurseExecute<TupleIndex + 1, RTs...>::exec(core,
               ptr, componentArrays, componentSizes, indices, componentOptional,
               componentStatic, nextIndices, input, targetSequence);
 
@@ -717,7 +717,7 @@ public:
           // We don't need to check return value of RecurseExecute since any
           // lower component would have returned false on the first call. The
           // result of the first call is cached in reachedEnd.
-          RecurseExecute<TupleIndex + 1, RTs...>::exec(
+          RecurseExecute<TupleIndex + 1, RTs...>::exec(core,
               ptr, componentArrays, componentSizes, indices, componentOptional,
               componentStatic, nextIndices, input, targetSequence);
         }
@@ -733,7 +733,7 @@ public:
   template <int TupleIndex>
   struct RecurseExecute<TupleIndex>
   {
-    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -744,7 +744,7 @@ public:
                      uint64_t targetSequence)
     {
       // Call our execute function with 'targetSequence' and 'input'.
-      gs_detail::call(targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::execute, input);
+      gs_detail::call(core, targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::execute, input);
       return true;
     }
   };
@@ -755,7 +755,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct GroupExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -835,7 +835,7 @@ public:
 
       // Depth first this will perform one execution with the target sequence
       // we found.
-      if (!GroupExecute<TupleIndex + 1, RTs...>::exec(ptr,
+      if (!GroupExecute<TupleIndex + 1, RTs...>::exec(core, ptr,
               componentArrays, componentSizes, indices, componentOptional,
               componentStatic, nextIndices, input, targetSequence))
       {
@@ -855,7 +855,7 @@ public:
   template <int TupleIndex>
   struct GroupExecute<TupleIndex>
   {
-    static bool exec(GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -866,7 +866,7 @@ public:
                      uint64_t targetSequence)
     {
       // Call our execute function with 'targetSequence' and 'input'.
-      gs_detail::call(targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::groupExecute, input);
+      gs_detail::call(core, targetSequence, ptr, &GenericSystem<GroupComponents, Ts...>::groupExecute, input);
       return true;
     }
   };
@@ -880,14 +880,14 @@ public:
   ///       So we opt for a runtime exception instead.
 
   // Non-grouped version of execute.
-  virtual void execute(uint64_t entityID, const Ts*... vs)
+  virtual void execute(ESCore&, uint64_t, const Ts*... vs)
   {
     std::cerr << "cpm-entity-system: Unimplmented system execute." << std::endl;
     throw std::runtime_error("cpm-entity-system: Unimplemented system execute.");
   }
 
   // Grouped version of execute.
-  virtual void groupExecute(uint64_t entityID, const ComponentGroup<Ts>&... groups)
+  virtual void groupExecute(ESCore&, uint64_t, const ComponentGroup<Ts>&... groups)
   {
     std::cerr << "cpm-entity-system: Unimplmented system group execute." << std::endl;
     throw std::runtime_error("cpm-entity-system: Unimplemented system group execute.");

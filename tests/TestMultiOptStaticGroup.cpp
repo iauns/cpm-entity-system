@@ -150,7 +150,7 @@ public:
     return es::OptionalComponents<CompHomPos, CompPosition>(templateID);
   }
 
-  void groupExecute(uint64_t entityID,
+  void groupExecute(es::ESCore&, uint64_t entityID,
                     const es::ComponentGroup<CompStaticLightDir>& dir,
                     const es::ComponentGroup<CompPosition>& pos,
                     const es::ComponentGroup<CompStaticCamera>& cam,

@@ -115,7 +115,7 @@ public:
     else return false;
   }
 
-  void execute(uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
+  void execute(es::ESCore&, uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
                const CompGameplay* gp) override
   {
     ++numCall;

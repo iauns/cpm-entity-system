@@ -56,7 +56,7 @@ public:
 
   static int numCall;
 
-  void execute(uint64_t /* entityID */, const CompStaticLightDir* dir, const CompStaticCamera* cam) override
+  void execute(es::ESCore&, uint64_t /* entityID */, const CompStaticLightDir* dir, const CompStaticCamera* cam) override
   {
     ++numCall;
 

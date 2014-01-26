@@ -103,13 +103,7 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void execute(uint64_t /*entityID*/, const CompPosition* /*pos*/, 
-               const CompHomPos* /* homPos */, const CompGameplay* /* gp */) override
-  {
-    FAIL() << "This should *never* be called in a grouped test." << std::endl;
-  }
-
-  void groupExecute(uint64_t entityID, 
+  void groupExecute(es::ESCore&, uint64_t entityID, 
                     const es::ComponentGroup<CompPosition>& pos,
                     const es::ComponentGroup<CompHomPos>&   homPos,
                     const es::ComponentGroup<CompGameplay>& gp) override
