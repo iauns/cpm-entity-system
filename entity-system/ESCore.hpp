@@ -5,8 +5,8 @@
 #include <list>
 #include <iostream>
 #include <stdexcept>
+#include "BaseSystem.hpp"
 #include "src/ComponentContainer.hpp"
-#include "src/BaseSystem.hpp"
 
 namespace CPM_ES_NS {
 
