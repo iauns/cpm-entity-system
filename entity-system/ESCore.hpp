@@ -103,7 +103,7 @@ public:
   }
 
   template <typename T>
-  T* getStaticComponent(int index)
+  T* getStaticComponent(int index = 0)
   {
     BaseComponentContainer* componentContainer = ensureComponentArrayExists<T>();
     ComponentContainer<T>* concreteContainer = dynamic_cast<ComponentContainer<T>*>(componentContainer);
