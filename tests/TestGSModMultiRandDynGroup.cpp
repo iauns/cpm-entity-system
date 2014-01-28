@@ -681,6 +681,31 @@ public:
         ++index;
       }
 
+      // Ensure we can perform the same iteration over the grouped components
+      auto listIt = list->begin();
+      for (auto it = head.begin(); it != head.end(); ++it)
+      {
+        if (!it->checkEqual(&(*listIt)))
+          return GroupIndex;
+        ++listIt;
+      }
+
+      // Test C++11 range based for loop syntax with head.
+      listIt = list->begin();
+      for (const RT& item : head)
+      {
+        if (!item.checkEqual(&(*listIt)))
+          return GroupIndex;
+        ++listIt;
+      }
+
+      // Manually test .front function.
+      if (head.size() > 0)
+      {
+        if (!head.front().checkEqual(&(list->front())))
+          return GroupIndex;
+      }
+
       return GroupCheck<GroupIndex + 1, RTs...>::check(ptr, entityID, rest...);
     }
   };

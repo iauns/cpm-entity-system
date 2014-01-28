@@ -91,10 +91,10 @@ struct ComponentGroup
 
   const T& operator[](std::size_t idx) const {return components[idx];}
   //T& operator[](std::size_t& idx) {return component[idx];}
-  std::size_t size(){return numComponents;}
+  std::size_t size() const {return numComponents;}
 
-  iterator begin(){ return iterator(components); }
-  iterator end()  { return iterator(components+numComponents); }
+  iterator begin() { return iterator(components); }
+  iterator end()   { return iterator(components+numComponents); }
   const_iterator begin() const{ return const_iterator(components); }
   const_iterator end() const  { return const_iterator(components+numComponents);}
 
@@ -102,7 +102,7 @@ struct ComponentGroup
   {
     if (numComponents != 0)
     {
-      return &components->component;
+      return components->component;
     }
     else
     {
@@ -110,12 +110,11 @@ struct ComponentGroup
       throw std::runtime_error("Attempt made to access front of empty ComponentGroup.");
     }
   }
-
   const T& back() const
   {
     if (numComponents != 0)
     {
-      return &components[numComponents - 1].component;
+      return components[numComponents - 1].component;
     }
     else
     {
