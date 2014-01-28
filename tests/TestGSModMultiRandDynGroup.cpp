@@ -632,7 +632,7 @@ public:
       if (ptr->mGen100() <= 15)
       {
         int i = 0;
-        for (const typename es::ComponentContainer<RT>::ComponentItem* it = head.begin(); it != head.end(); ++it, ++i)
+        for (auto it = head.begin(); it != head.end(); ++it, ++i)
         {
           if (ptr->mGen100() < 70)
           {

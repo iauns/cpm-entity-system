@@ -15,59 +15,10 @@
 #include "ESCore.hpp"
 #include "src/ComponentContainer.hpp"
 #include "src/TemplateID.hpp"
+#include "src/ComponentGroup.hpp"
 
 namespace CPM_ES_NS {
 
-// Simple structure to group like components (components belonging to the
-// same entity). Used when the ComponentGroup template parameter is true.
-template <typename T>
-struct ComponentGroup
-{
-  size_t numComponents;   ///< Number of components in this group.
-  typename ComponentContainer<T>::ComponentItem* components;
-
-  size_t size() const
-  {
-    return numComponents;
-  }
-
-  const T* front() const
-  {
-    if (numComponents != 0) return &components->component;
-    else return nullptr;
-  }
-
-  const T* back() const
-  {
-    if (numComponents > 0)  return &components[numComponents - 1].component;
-    else return nullptr;
-  }
-
-  const typename ComponentContainer<T>::ComponentItem* begin() const
-  {
-    return components;
-  }
-
-  const typename ComponentContainer<T>::ComponentItem* end() const
-  {
-    return &components[numComponents];  // 1 passed the end, but users shouldn't access the end().
-  }
-
-  void modify(const T& val, size_t componentNum = 0, int priority = 1) const
-  {
-    // Modify value by storing index, in raw array, to modified component.
-    // This index will be used when re-integrating changes made at the end
-    // of the frame.
-    container->modifyIndex(val, containerIndex + componentNum, priority);
-  }
-
-  // The following two variables are only used when modify is called. Used
-  // to modify the value of the component.
-  size_t containerIndex;
-  ComponentContainer<T>* container;
-
-  /// \todo Overload [] operator to return indivdual components.
-};
 
 namespace gs_detail
 {
