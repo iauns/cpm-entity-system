@@ -58,7 +58,9 @@ static void removeEntityImpl(BaseComponentContainer* cont, uint64_t entityID)
 
 void ContainerMapInterface::removeEntity(uint64_t entityID)
 {
-  iterateOverContainers(std::bind(removeEntityImpl, std::placeholders::_1, entityID));
+  std::function<void(BaseComponentContainer*)> f1 =
+      std::bind(removeEntityImpl, std::placeholders::_1, entityID);
+  iterateOverContainers(f1);
 }
 
 static void renormalizeImpl(BaseComponentContainer* cont, bool stableSort)
@@ -66,9 +68,11 @@ static void renormalizeImpl(BaseComponentContainer* cont, bool stableSort)
   cont->renormalize(stableSort);
 }
 
-void ContainerMapInterface::renormalize(BaseComponentContainer* cont, bool stableSort)
+void ContainerMapInterface::renormalize(bool stableSort)
 {
-  iterateOverContainers(std::bind(renormalizeImpl, std::placeholders::_1, stableSort));
+  std::function<void(BaseComponentContainer*)> f1 = 
+      std::bind(renormalizeImpl, std::placeholders::_1, stableSort);
+  iterateOverContainers(f1);
 }
 
 } // namespace CPM_ES_NS

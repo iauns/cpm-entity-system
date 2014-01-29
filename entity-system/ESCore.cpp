@@ -46,12 +46,20 @@ void ESCore::addComponentContainer(BaseComponentContainer* componentCont)
   }
 }
 
-void ESCore::iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb) override
+void ESCore::iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb)
 {
   for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
   {
-    cp(*it->second);
+    cb(it->second);
   }
+}
+
+void ESCore::clearAllComponentContainers()
+{
+  for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+    delete iter->second;
+
+  mComponents.clear();
 }
 
 } // namespace CPM_ES_NS
