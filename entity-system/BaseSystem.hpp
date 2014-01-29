@@ -13,6 +13,8 @@ public:
   
   virtual void walkComponents(ESCore& core) = 0;
   virtual bool walkEntity(ESCore& core, uint64_t entityID) = 0;
+
+  virtual uint64_t getUniqueID() {return 0;}
 };
 
 } // namespace CPM_ES_NS

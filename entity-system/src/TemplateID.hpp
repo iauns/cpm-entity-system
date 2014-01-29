@@ -1,8 +1,8 @@
 /// \author James Hughes
 /// \date   December 2013
 
-#ifndef ION_GAMEPLAY_TEMPLATEID_HPP
-#define ION_GAMEPLAY_TEMPLATEID_HPP
+#ifndef IAUNS_CPM_ENTITY_SYSTEM_TEMPLATEID_HPP
+#define IAUNS_CPM_ENTITY_SYSTEM_TEMPLATEID_HPP
 
 #include <cstdint>
 
@@ -17,6 +17,8 @@ public:
     ++mCurrentTypeID;
     return mCurrentTypeID;
   }
+
+  static void setCounter(uint64_t newCount) {mCurrentTypeID = newCount;}
 
 private:
   static uint64_t mCurrentTypeID;
