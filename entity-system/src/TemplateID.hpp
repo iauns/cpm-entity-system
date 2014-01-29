@@ -12,6 +12,8 @@ class TemplateIDHelper
 {
 public:
 
+  static const int InitialStartingID = 0;
+
   static uint64_t getNewTypeID()
   {
     ++mCurrentTypeID;
@@ -19,6 +21,7 @@ public:
   }
 
   static void setCounter(uint64_t newCount) {mCurrentTypeID = newCount;}
+  static uint64_t getCurrentTypeID()        {return mCurrentTypeID;}
 
 private:
   static uint64_t mCurrentTypeID;
@@ -38,7 +41,12 @@ public:
       mStaticTypeID = TemplateIDHelper::getNewTypeID();
 
     return mStaticTypeID;
-  };
+  }
+
+  static uint64_t setID(uint64_t id)
+  {
+    mStaticTypeID = id;
+  }
 
   static uint64_t mStaticTypeID;
 };

@@ -5,7 +5,7 @@
 
 namespace CPM_ES_NS {
 
-uint64_t TemplateIDHelper::mCurrentTypeID = 0;
+uint64_t TemplateIDHelper::mCurrentTypeID = TemplateIDHelper::InitialStartingID;
 
 } // namespace CPM_ES_NS
 
