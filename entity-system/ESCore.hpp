@@ -41,8 +41,7 @@ public:
   /// not be used if you are controlling entity ids using external code.
   uint64_t getNewEntityID() {return ++mCurSequence;}
 
-private:
-
+protected:
   std::map<uint64_t, BaseComponentContainer*> mComponents;
   uint64_t                                    mCurSequence;
 };
