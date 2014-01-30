@@ -33,6 +33,14 @@ endif()
 # CPM Modules
 #-----------------------------------------------------------------------
 
+if ((DEFINED CPM_ES_USE_BSON) AND (CPM_ES_USE_BSON))
+  CPM_AddModule("bson"
+    GIT_REPOSITORY "https://github.com/iauns/cpm-bson"
+    GIT_TAG "1.0.0"
+    USE_EXISTING_VER TRUE)
+  add_definitions(-DCPM_ES_USE_BSON)
+endif()
+
 # This call will ensure all include directories and definitions are present
 # in the target. These correspond to the modules that we added above.
 CPM_InitModule(${CPM_MODULE_NAME})

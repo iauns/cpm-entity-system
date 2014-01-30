@@ -38,6 +38,35 @@ auto maybe_component_destruct(T& v, uint64_t sequence, int)
 template<class T>
 void maybe_component_destruct(T&, size_t, long){}
 
+
+template<class T>
+const char* maybe_component_name()
+    -> decltype(T::getName(), void())
+{
+  return T::getName();
+}
+
+template<class T>
+const char* maybe_component_name()
+{
+  return nullptr;
+}
+
+#ifdef CPM_ES_USE_BSON
+template<class T>
+auto maybe_component_serialize(T& v)
+  -> decltype(v.serialize())
+{
+  
+}
+
+template<class T>
+void maybe_component_serialize(T&)
+{
+
+}
+#endif
+
 }
 
 /// Component container.
@@ -71,6 +100,11 @@ public:
   /// Retrieves the ID of our encapsulated component (T).
   uint64_t getComponentID() override {return TemplateID<T>::getID();}
 
+  /// Retrieve component name, if provided by the component.
+  const char* getName() override
+  {
+    return cc_detail::maybe_component_name(it->component);
+  }
 
   /// Item that represents one component paired with a sequence.
   struct ComponentItem

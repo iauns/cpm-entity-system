@@ -34,6 +34,10 @@ public:
   /// Removes the last component found that is associated with 'sequence'.
   virtual void removeLastSequence(uint64_t sequence) = 0;
 
+  /// Retrieves name of the component. nullptr if the component does not
+  /// expose a name.
+  virtual const char* getName() = 0;
+
   /// Returns true if the component system contains only static elements.
   /// These elements values are always the same regardless of the entity
   /// executing. Use for global values.
