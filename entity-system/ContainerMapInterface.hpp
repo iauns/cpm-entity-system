@@ -67,10 +67,10 @@ public:
   void removeLastComponent(uint64_t entityID, uint64_t compTemplateID);
   /// @}
 
-  /// Call this function at the beginning of every frame! It renormalizes all
-  /// your components (adds / removes components). To call a system, execute the
-  /// walkComponents function on BaseSystem. Most systems don't need a stable
-  /// sort. But if you need to guarantee the relative order of multiple 
+  /// Call this function at the beginning or end of every frame. It renormalizes
+  /// all your components (adds / removes components). To call a system, execute
+  /// the walkComponents function on BaseSystem. Most systems don't need a
+  /// stable sort. But if you need to guarantee the relative order of multiple 
   /// components with the same entity ID, use stable sort.
   virtual void renormalize(bool stableSort = false);
 

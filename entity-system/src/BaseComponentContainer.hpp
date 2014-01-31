@@ -1,6 +1,8 @@
 #ifndef IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 #define IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 
+class ESSerialize;
+
 namespace CPM_ES_NS {
 
 // Component base class, used to verify component types at run-time.
@@ -33,6 +35,20 @@ public:
 
   /// Removes the last component found that is associated with 'sequence'.
   virtual void removeLastSequence(uint64_t sequence) = 0;
+
+  /// Retrieves the name of the component. Useful in drawing up serialization
+  /// schemes to disk or between computers. Returns nullptr if the getName
+  /// static function is not implemented by the component.
+  virtual const char* getComponentName() = 0;
+
+  /// Serializes all components associated with this BaseComponentContainer.
+  /// SerializeBase is not defined by cpm-entity-system. It must be defined
+  /// in your code if you use this function. The function that will be called
+  /// on the component is: serialize(ESSerializeBase*, uint64_t entityID).
+  /// This also serializes components that have not yet been normalized
+  /// and inserted into the system. It is best to renormalize the system
+  /// before calling this function.
+  virtual void serializeComponents(ESSerialize& s) = 0;
 
   /// Returns true if the component system contains only static elements.
   /// These elements values are always the same regardless of the entity

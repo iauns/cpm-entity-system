@@ -7,10 +7,6 @@
 #include "TemplateID.hpp"
 #include "BaseComponentContainer.hpp"
 
-
-/// \todo Add serialization compile time polymorphic function.
-///       Will serialize data structure to BSON or something else.
-
 namespace CPM_ES_NS {
 
 namespace cc_detail {
@@ -37,6 +33,27 @@ auto maybe_component_destruct(T& v, uint64_t sequence, int)
 
 template<class T>
 void maybe_component_destruct(T&, size_t, long){}
+
+template<class T>
+auto maybe_component_name()
+    -> decltype(T::maybe_component_name(), void())
+{
+  return T::maybe_component_name();
+}
+
+template<class T>
+const char* maybe_component_name(){return nullptr;}
+
+
+template<class T>
+auto maybe_component_serialize(T& v, ESSerialize& b, uint64_t sequence)
+    -> decltype(v.serialize(b, sequence), void())
+{
+  v.serialize(b, sequence);
+}
+
+template<class T>
+void maybe_component_serialize(T&, ESSerialize&, uint64_t sequence){}
 
 }
 
@@ -71,6 +88,21 @@ public:
   /// Retrieves the ID of our encapsulated component (T).
   uint64_t getComponentID() override {return TemplateID<T>::getID();}
 
+  /// Retrieves the name of a component.
+  const char* getComponentName() override
+  {
+    return cc_detail::maybe_component_name<T>();
+  }
+
+  /// Serializes all components within the system, given the serialization
+  /// base type ESSerialize.
+  void serializeComponents(ESSerialize& s) override
+  {
+    for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
+    {
+      cc_detail::maybe_component_serialize<T>(it->component, s, it->sequence);
+    }
+  }
 
   /// Item that represents one component paired with a sequence.
   struct ComponentItem
