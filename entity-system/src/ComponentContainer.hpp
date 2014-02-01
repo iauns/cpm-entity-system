@@ -35,25 +35,25 @@ template<class T>
 void maybe_component_destruct(T&, size_t, long){}
 
 template<class T>
-auto maybe_component_name()
-    -> decltype(T::maybe_component_name(), void())
+auto maybe_component_name(const char** name, int)
+    -> decltype(T::getName(), void())
 {
-  return T::maybe_component_name();
+  *name = T::getName();
 }
 
 template<class T>
-const char* maybe_component_name(){return nullptr;}
+void maybe_component_name(const char** name, long){}
 
 
 template<class T>
-auto maybe_component_serialize(T& v, ESSerialize& b, uint64_t sequence)
+auto maybe_component_serialize(T& v, ESSerialize& b, uint64_t sequence, int)
     -> decltype(v.serialize(b, sequence), void())
 {
   v.serialize(b, sequence);
 }
 
 template<class T>
-void maybe_component_serialize(T&, ESSerialize&, uint64_t sequence){}
+void maybe_component_serialize(T&, ESSerialize&, uint64_t sequence, long){}
 
 }
 
@@ -91,7 +91,9 @@ public:
   /// Retrieves the name of a component.
   const char* getComponentName() override
   {
-    return cc_detail::maybe_component_name<T>();
+    const char* name = nullptr;
+    cc_detail::maybe_component_name<T>(&name, 0);
+    return name;
   }
 
   /// Serializes all components within the system, given the serialization
@@ -100,7 +102,7 @@ public:
   {
     for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
     {
-      cc_detail::maybe_component_serialize<T>(it->component, s, it->sequence);
+      cc_detail::maybe_component_serialize<T>(it->component, s, it->sequence, 0);
     }
   }
 
