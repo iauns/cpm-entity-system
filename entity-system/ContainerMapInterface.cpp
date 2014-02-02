@@ -51,29 +51,6 @@ void ContainerMapInterface::removeAllComponents(uint64_t entityID, uint64_t comp
   cont->removeSequence(entityID);
 }
 
-static void removeEntityImpl(BaseComponentContainer* cont, uint64_t entityID)
-{
-  cont->removeSequence(entityID);
-}
-
-void ContainerMapInterface::removeEntity(uint64_t entityID)
-{
-  std::function<void(BaseComponentContainer*)> f1 =
-      std::bind(removeEntityImpl, std::placeholders::_1, entityID);
-  iterateOverContainers(f1);
-}
-
-static void renormalizeImpl(BaseComponentContainer* cont, bool stableSort)
-{
-  cont->renormalize(stableSort);
-}
-
-void ContainerMapInterface::renormalize(bool stableSort)
-{
-  std::function<void(BaseComponentContainer*)> f1 = 
-      std::bind(renormalizeImpl, std::placeholders::_1, stableSort);
-  iterateOverContainers(f1);
-}
 
 } // namespace CPM_ES_NS
 

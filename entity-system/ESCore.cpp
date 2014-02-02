@@ -62,5 +62,17 @@ void ESCore::clearAllComponentContainers()
   mComponents.clear();
 }
 
+void ESCore::renormalize(bool stableSort)
+{
+  for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+    iter->second->renormalize(stableSort);
+}
+
+void ESCore::removeEntity(uint64_t entityID)
+{
+  for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+    iter->second->removeSequence(entityID);
+}
+
 } // namespace CPM_ES_NS
 

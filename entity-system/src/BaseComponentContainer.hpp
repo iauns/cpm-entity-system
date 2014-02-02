@@ -15,6 +15,7 @@ public:
   virtual void renormalize(bool stableSort) = 0;
 
   /// Retrieve the component ID that is to be managed by the base component.
+  /// DEPRECATED -- will be removed.
   virtual uint64_t getComponentID() = 0;
 
   /// Get the least sequence held by the component.

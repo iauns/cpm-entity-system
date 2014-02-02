@@ -86,6 +86,7 @@ public:
   }
   
   /// Retrieves the ID of our encapsulated component (T).
+  /// DEPRECATED
   uint64_t getComponentID() override {return TemplateID<T>::getID();}
 
   /// Retrieves the name of a component.
