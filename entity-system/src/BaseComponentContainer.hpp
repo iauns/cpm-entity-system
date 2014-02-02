@@ -14,10 +14,6 @@ public:
   
   virtual void renormalize(bool stableSort) = 0;
 
-  /// Retrieve the component ID that is to be managed by the base component.
-  /// DEPRECATED -- will be removed.
-  virtual uint64_t getComponentID() = 0;
-
   /// Get the least sequence held by the component.
   virtual uint64_t getLowerSequence() = 0;
 
@@ -40,6 +36,8 @@ public:
   /// Retrieves the name of the component. Useful in drawing up serialization
   /// schemes to disk or between computers. Returns nullptr if the getName
   /// static function is not implemented by the component.
+  /// DEPRECATED: This is application specific. Functionality can be replicated
+  /// once we finalize a more flexible ComponentContainer system.
   virtual const char* getComponentName() = 0;
 
   /// Serializes all components associated with this BaseComponentContainer.
@@ -49,6 +47,8 @@ public:
   /// This also serializes components that have not yet been normalized
   /// and inserted into the system. It is best to renormalize the system
   /// before calling this function.
+  /// DEPRECATED: This is application specific. Functionality can be replicated
+  /// once we finalize a more flexible ComponentContainer system.
   virtual void serializeComponents(ESSerialize& s) = 0;
 
   /// Returns true if the component system contains only static elements.

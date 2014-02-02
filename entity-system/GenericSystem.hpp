@@ -55,6 +55,13 @@ void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
 
 
 
+/// DEPRECATED: init_impl::ensureContainersPresent must be removed.
+/// GenericSystem does not have enough information to create component
+/// containers of the appropriate type. ContainerMapInterface, which all
+/// instances of ESCore will be replaced with will also not have enough
+/// information in order to call addComponentContainer. A new call that will
+/// return a dummy empty component container will be used instead of relying
+/// on the existence of all containers before starting our walking algorithms.
 template <typename... RTs>
 struct init_impl;
 
@@ -67,7 +74,7 @@ struct init_impl<RT, RTs...>
     // add the component default reserve, if any.
     if (!core->hasComponentContainer(TemplateID<RT>::getID()))
     {
-      core->addComponentContainer(new ComponentContainer<RT>());
+      core->addComponentContainer(new ComponentContainer<RT>(), TemplateID<RT>::getID());
     }
 
     return init_impl<RTs...>::ensureContainersPresent(core);

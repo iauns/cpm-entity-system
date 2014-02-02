@@ -26,7 +26,7 @@ public:
   /// When called, ESCore takes ownership of \p component.
   /// Adds a new component to the system. If a component of the same
   /// TypeID already exists, the request is ignored.
-  void addComponentContainer(BaseComponentContainer* component) override;
+  void addComponentContainer(BaseComponentContainer* component, uint64_t containerID) override;
 
   /// Retrieves a base component container. Component is the output from
   /// the TemplateID class.
@@ -124,7 +124,7 @@ protected:
     if (componentContainer == nullptr)
     {
       componentContainer = new ComponentContainer<T>();
-      addComponentContainer(componentContainer);
+      addComponentContainer(componentContainer, TemplateID<T>::getID());
     }
     return componentContainer;
   }

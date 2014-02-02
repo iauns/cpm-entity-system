@@ -26,7 +26,8 @@ public:
   /// container (BaseComponentContainer). Should issue a warning and refuse
   /// to add (and delete) \p component if there is already a pre-existing
   /// container. Used to automatically add containers via GenericSystem.
-  virtual void addComponentContainer(BaseComponentContainer* component) = 0;
+  /// containerTypeID is the TemplateID of the type being managed.
+  virtual void addComponentContainer(BaseComponentContainer* component, uint64_t containerTypeID) = 0;
 
   /// Retrieves base component container. Used by GenericSystem to retrieve
   /// containers associated with particular components.

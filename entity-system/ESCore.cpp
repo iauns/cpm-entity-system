@@ -31,9 +31,8 @@ BaseComponentContainer* ESCore::getComponentContainer(uint64_t component)
     return nullptr;
 }
 
-void ESCore::addComponentContainer(BaseComponentContainer* componentCont)
+void ESCore::addComponentContainer(BaseComponentContainer* componentCont, uint64_t componentID)
 {
-  uint64_t componentID = componentCont->getComponentID();
   auto it = mComponents.find(componentID);
   if (it == mComponents.end())
   {

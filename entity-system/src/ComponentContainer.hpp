@@ -34,6 +34,7 @@ auto maybe_component_destruct(T& v, uint64_t sequence, int)
 template<class T>
 void maybe_component_destruct(T&, size_t, long){}
 
+// DEPRECATED: getName is application specific.
 template<class T>
 auto maybe_component_name(const char** name, int)
     -> decltype(T::getName(), void())
@@ -45,6 +46,7 @@ template<class T>
 void maybe_component_name(const char** name, long){}
 
 
+// DEPRECATED: serialization is application specific.
 template<class T>
 auto maybe_component_serialize(T& v, ESSerialize& b, uint64_t sequence, int)
     -> decltype(v.serialize(b, sequence), void())
@@ -85,11 +87,8 @@ public:
     }
   }
   
-  /// Retrieves the ID of our encapsulated component (T).
-  /// DEPRECATED
-  uint64_t getComponentID() override {return TemplateID<T>::getID();}
-
   /// Retrieves the name of a component.
+  /// DEPRECATED.
   const char* getComponentName() override
   {
     const char* name = nullptr;
@@ -99,6 +98,7 @@ public:
 
   /// Serializes all components within the system, given the serialization
   /// base type ESSerialize.
+  /// DEPRECATED
   void serializeComponents(ESSerialize& s) override
   {
     for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
