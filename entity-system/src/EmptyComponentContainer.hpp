@@ -1,9 +1,6 @@
 #ifndef IAUNS_ENTITY_SYSTEM_EMPTYCOMPONENTCONTAINER_HPP
 #define IAUNS_ENTITY_SYSTEM_EMPTYCOMPONENTCONTAINER_HPP
 
-// DEPRECATED
-class ESSerialize;
-
 namespace CPM_ES_NS {
 
 // Component base class, used to verify component types at run-time.
@@ -20,8 +17,6 @@ public:
   void removeSequence(uint64_t) override {}
   void removeFirstSequence(uint64_t) override {}
   void removeLastSequence(uint64_t) override {}
-  const char* getComponentName() override {return nullptr;}
-  void serializeComponents(ESSerialize&) override {}
   bool isStatic() override {return false;}
   uint64_t getSequenceFromIndex(int) override {return 0;}
 };

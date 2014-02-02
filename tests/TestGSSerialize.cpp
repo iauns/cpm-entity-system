@@ -1,18 +1,22 @@
 
 #include <entity-system/GenericSystem.hpp>
-#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
 
 namespace es = CPM_ES_NS;
 
+
+namespace {
+
+class GetNameCore;
+
 class ESSerialize
 {
 public:
 
-  std::shared_ptr<es::ESCore> mCore;
-  ESSerialize(std::shared_ptr<es::ESCore> core) : mCore(core) {}
+  std::shared_ptr<GetNameCore> mCore;
+  ESSerialize(std::shared_ptr<GetNameCore> core) : mCore(core) {}
 
   static int mNumPosCalls;
   static int mNumHomCalls;
@@ -26,9 +30,6 @@ public:
 int ESSerialize::mNumPosCalls = 0;
 int ESSerialize::mNumHomCalls = 0;
 int ESSerialize::mNumGamCalls = 0;
-
-namespace {
-
 
 // We may want to enforce that these components have bson serialization members
 // (possibly a static assert?).
@@ -132,6 +133,89 @@ static std::vector<CompGameplay> gameplayComponents = {
   CompGameplay(23, 92),
 };
 
+
+class SerializeInterface
+{
+public:
+  virtual void serialize(ESSerialize& s) = 0;
+};
+
+// http://stackoverflow.com/questions/12509962/static-assert-for-ensuring-design-contract
+template <typename T>
+class has_serialize_fun
+{
+    typedef char one;
+    typedef long two;
+
+    template <typename C> static one test( decltype(&C::serialize) ) ;
+    template <typename C> static two test(...);
+
+public:
+    enum { value = sizeof(test<T>(0)) == sizeof(char) };
+};
+
+// We can require that all components have get_name.
+template <typename T>
+class CustomContainer : public es::ComponentContainer<T>, public SerializeInterface
+{
+public:
+
+  void serialize(ESSerialize& s) override
+  {
+    // Enforce the contract that all components must have a serialize function.
+    static_assert( has_serialize_fun<T>::value, "Component does not have a serialize function." );
+
+    // In a real function, you will likely want to enforce that the getName
+    // function exists.
+
+    // Normally we would serialize a number of values here. In particular,
+    // mLastSortedSize and removals / modifications.
+    // But instead of serializing all of this information you can just simply
+    // renormalize directly before the serialize call and forget about all
+    // of that information.
+
+    /// Serializes all component even if they have not been normalized into
+    /// the system. See the destructor for ComponentContainer if you only
+    /// want to serialize those components currently normalized into the system.
+    /// Require the 
+    for (auto it = es::ComponentContainer<T>::mComponents.begin(); 
+         it != es::ComponentContainer<T>::mComponents.end(); ++it)
+    {
+      it->component.serialize(s, it->sequence);
+    }
+  }
+  
+};
+
+class GetNameCore : public es::ESCoreBase
+{
+public:
+  template <typename T>
+  const char* getComponentName();
+
+  template <typename T>
+  void addComponent(uint64_t entityID, const T& component)
+  {
+    coreAddComponent<T, CustomContainer<T>>(entityID, component);
+  }
+
+  template <typename T>
+  size_t addStaticComponent(const T& component)
+  {
+    return coreAddStaticComponent<T, CustomContainer<T>>(component);
+  }
+
+  // Runs through all components and serializes them.
+  void serializeComponents(ESSerialize& s)
+  {
+    for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
+    {
+      dynamic_cast<SerializeInterface*>(it->second)->serialize(s);
+    }
+  }
+
+};
+
 // This basic system will apply, every frame, to entities with the CompPosition,
 // CompHomPos, and CompGameplay components.
 class BasicSystem : public es::GenericSystem<false, CompPosition, CompHomPos, CompGameplay>
@@ -157,15 +241,10 @@ public:
 
 std::map<uint64_t, bool> BasicSystem::invalidComponents;
 
-void serializeOverContainers(es::BaseComponentContainer* cont, ESSerialize& s)
-{
-  cont->serializeComponents(s);
-}
-
 TEST(EntitySystem, TestSerialize)
 {
   // Generate entity system core.
-  std::shared_ptr<es::ESCore> core(new es::ESCore());
+  std::shared_ptr<GetNameCore> core(new GetNameCore());
 
   uint64_t id = core->getNewEntityID();
   core->addComponent(id, posComponents[id]);
@@ -193,10 +272,7 @@ TEST(EntitySystem, TestSerialize)
   sys->walkComponents(*core);
 
   std::shared_ptr<ESSerialize> s(new ESSerialize(core));
-
-  std::function<void(es::BaseComponentContainer*)> f1 =
-      std::bind(serializeOverContainers, std::placeholders::_1, std::ref(*s));
-  core->iterateOverContainers(f1);
+  core->serializeComponents(*s);
 
   EXPECT_EQ(3, ESSerialize::mNumPosCalls);
   EXPECT_EQ(4, ESSerialize::mNumHomCalls);

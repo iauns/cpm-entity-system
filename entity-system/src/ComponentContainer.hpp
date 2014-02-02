@@ -34,29 +34,6 @@ auto maybe_component_destruct(T& v, uint64_t sequence, int)
 template<class T>
 void maybe_component_destruct(T&, size_t, long){}
 
-// DEPRECATED: getName is application specific.
-template<class T>
-auto maybe_component_name(const char** name, int)
-    -> decltype(T::getName(), void())
-{
-  *name = T::getName();
-}
-
-template<class T>
-void maybe_component_name(const char** name, long){}
-
-
-// DEPRECATED: serialization is application specific.
-template<class T>
-auto maybe_component_serialize(T& v, ESSerialize& b, uint64_t sequence, int)
-    -> decltype(v.serialize(b, sequence), void())
-{
-  v.serialize(b, sequence);
-}
-
-template<class T>
-void maybe_component_serialize(T&, ESSerialize&, uint64_t sequence, long){}
-
 }
 
 /// Component container.
@@ -84,26 +61,6 @@ public:
     for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
     {
       cc_detail::maybe_component_destruct(it->component, it->sequence, 0);
-    }
-  }
-  
-  /// Retrieves the name of a component.
-  /// DEPRECATED.
-  const char* getComponentName() override
-  {
-    const char* name = nullptr;
-    cc_detail::maybe_component_name<T>(&name, 0);
-    return name;
-  }
-
-  /// Serializes all components within the system, given the serialization
-  /// base type ESSerialize.
-  /// DEPRECATED
-  void serializeComponents(ESSerialize& s) override
-  {
-    for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
-    {
-      cc_detail::maybe_component_serialize<T>(it->component, s, it->sequence, 0);
     }
   }
 
@@ -492,6 +449,7 @@ public:
     return a.componentIndex < b.componentIndex;
   }
 
+protected:
   std::vector<ComponentItem>    mComponents;    ///< All components currently in the system.
   std::vector<RemovalItem>      mRemovals;      ///< An array of objects to remove during
                                                 ///< renormalization.
