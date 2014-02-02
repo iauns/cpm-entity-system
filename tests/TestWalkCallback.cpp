@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -104,17 +105,17 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void preWalkComponents(es::ESCore& /* core */)
+  void preWalkComponents(es::CoreInt& /* core */)
   {
     ++preWalkCalls;    
   }
 
-  void postWalkComponents(es::ESCore& /* core */)
+  void postWalkComponents(es::CoreInt& /* core */)
   {
     ++postWalkCalls;
   }
 
-  void execute(es::ESCore&, uint64_t entityID, const CompPosition* pos, 
+  void execute(es::CoreInt&, uint64_t entityID, const CompPosition* pos, 
                const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCalls;

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "BaseSystem.hpp"
-#include "ContainerMapInterface.hpp"
+#include "CoreInt.hpp"
 #include "src/ComponentContainer.hpp"
 
 namespace CPM_ES_NS {
@@ -14,7 +14,7 @@ namespace CPM_ES_NS {
 /// An example of creating a component container map using a std::map.
 /// Feel free to use this class instead of rolling your own.
 //template <template<typename T> typename Container = ComponentContainer>
-class ESCore : public ContainerMapInterface
+class ESCore : public CoreInt
 {
 public:
   ESCore();

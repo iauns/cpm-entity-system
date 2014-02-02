@@ -12,7 +12,7 @@
 #include <set>          // Only used in a corner case of walkComponents where
                         // all components are optional.
 #include <type_traits>
-#include "ESCore.hpp"
+#include "CoreInt.hpp"
 #include "src/ComponentContainer.hpp"
 #include "src/TemplateID.hpp"
 #include "src/ComponentGroup.hpp"
@@ -27,7 +27,7 @@ namespace gs_detail
 template <typename C, typename F, typename Tuple, bool Done, int Total, int... N>
 struct call_impl
 {
-  static void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
+  static void call(CoreInt& core, uint64_t sequence, C c, F f, Tuple && t)
   {
     call_impl<C, F, Tuple, Total == 1 + sizeof...(N), Total, N..., sizeof...(N)>::call(core, sequence, c, f, std::forward<Tuple>(t));
   }
@@ -36,7 +36,7 @@ struct call_impl
 template <typename C, typename F, typename Tuple, int Total, int... N>
 struct call_impl<C, F, Tuple, bool(true), Total, N...>
 {
-  static void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
+  static void call(CoreInt& core, uint64_t sequence, C c, F f, Tuple && t)
   {
     // Call the variadic member function (c.*f) with expanded template
     // parameter list (std::get<N>(std::forward<Tuple>(t))...).
@@ -47,7 +47,7 @@ struct call_impl<C, F, Tuple, bool(true), Total, N...>
 /// C = class type, F = function type.
 /// c = class instance, f = member function pointer.
 template <typename C, typename F, typename Tuple>
-void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
+void call(CoreInt& core, uint64_t sequence, C c, F f, Tuple && t)
 {
   typedef typename std::decay<Tuple>::type ttype;
   call_impl<C, F, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::call(core, sequence, c, f, std::forward<Tuple>(t));
@@ -86,7 +86,7 @@ public:
   GenericSystem()           {}
   virtual ~GenericSystem()  {}
 
-  bool walkEntity(ESCore& core, uint64_t entityID) override
+  bool walkEntity(CoreInt& core, uint64_t entityID) override
   {
     /// \todo Remove excess calls to getComponentContainer. There should only
     ///       be one call made to getComponentContainer. Also think about
@@ -102,8 +102,8 @@ public:
     std::array<int, sizeof...(Ts)> numComponents;
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
-    // Build component arrays minding the possibility that baseComponents can
-    // contain nullptr data.
+    // Arrays containing components arrays. BuildComponentArrays was made to be
+    // called before we correct baseComponents with getEmptyContainer.
     std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays;
     BuildComponentArraysAndIndicesWithID<0, Ts...>::exec(baseComponents, componentArrays, indices, entityID);
 
@@ -116,7 +116,7 @@ public:
     for (int i = 0; i < sizeof...(Ts); i++)
     {
       if (baseComponents[i] == nullptr)
-        baseComponents[i] = ContainerMapInterface::getEmptyContainer();
+        baseComponents[i] = CoreInt::getEmptyContainer();
 
       isStatic[i] = baseComponents[i]->isStatic();
       numComponents[i] = baseComponents[i]->getNumComponents();
@@ -159,14 +159,14 @@ public:
     }
   }
 
-  void walkComponents(ESCore& core) override
+  void walkComponents(CoreInt& core) override
   {
     preWalkComponents(core);
     walkComponentsInternal(core);
     postWalkComponents(core);
   }
 
-  void walkComponentsInternal(ESCore& core)
+  void walkComponentsInternal(CoreInt& core)
   {
     if (sizeof...(Ts) == 0)
       return;
@@ -181,7 +181,8 @@ public:
     std::array<bool, sizeof...(Ts)> isStatic;
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
-    // Arrays containing components arrays.
+    // Arrays containing components arrays. BuildComponentArrays was made to be
+    // called before we correct baseComponents with getEmptyContainer.
     std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays;
     BuildComponentArrays<0, Ts...>::exec(baseComponents, componentArrays);
 
@@ -197,7 +198,7 @@ public:
     for (int i = 0; i < sizeof...(Ts); ++i)
     {
       if (baseComponents[i] == nullptr)
-        baseComponents[i] = ContainerMapInterface::getEmptyContainer();
+        baseComponents[i] = CoreInt::getEmptyContainer();
 
       bool optional = optionalComponents[i];
       // An empty mandatory component results in an immediate termination
@@ -574,7 +575,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct AddComponentsToGroupInputs<TupleIndex, RT, RTs...>
   {
-    static void exec(ESCore& core, std::array<BaseComponentContainer*, sizeof...(Ts)>& baseComponents,
+    static void exec(CoreInt& core, std::array<BaseComponentContainer*, sizeof...(Ts)>& baseComponents,
                      std::tuple<ComponentGroup<Ts>...>& input)
     {
       if (baseComponents[TupleIndex] != nullptr)
@@ -593,7 +594,7 @@ public:
   template <int TupleIndex>
   struct AddComponentsToGroupInputs<TupleIndex>
   {
-    static void exec(ESCore& /* core */, std::array<BaseComponentContainer*, sizeof...(Ts)>& /* baseComponents */,
+    static void exec(CoreInt& /* core */, std::array<BaseComponentContainer*, sizeof...(Ts)>& /* baseComponents */,
                      std::tuple<ComponentGroup<Ts>...>& /* input */) {}
   };
 
@@ -603,7 +604,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct RecurseExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(CoreInt& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -736,7 +737,7 @@ public:
   template <int TupleIndex>
   struct RecurseExecute<TupleIndex>
   {
-    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(CoreInt& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -758,7 +759,7 @@ public:
   template <int TupleIndex, typename RT, typename... RTs>
   struct GroupExecute<TupleIndex, RT, RTs...>
   {
-    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(CoreInt& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -860,7 +861,7 @@ public:
   template <int TupleIndex>
   struct GroupExecute<TupleIndex>
   {
-    static bool exec(ESCore& core, GenericSystem<GroupComponents, Ts...>* ptr,
+    static bool exec(CoreInt& core, GenericSystem<GroupComponents, Ts...>* ptr,
                      const std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
                      const std::array<int, sizeof...(Ts)>& componentSizes,
                      const std::array<int, sizeof...(Ts)>& indices,
@@ -885,14 +886,14 @@ public:
   ///       So we opt for a runtime exception instead.
 
   // Non-grouped version of execute.
-  virtual void execute(ESCore&, uint64_t, const Ts*... vs)
+  virtual void execute(CoreInt&, uint64_t, const Ts*... vs)
   {
     std::cerr << "cpm-entity-system: Unimplmented system execute." << std::endl;
     throw std::runtime_error("cpm-entity-system: Unimplemented system execute.");
   }
 
   // Grouped version of execute.
-  virtual void groupExecute(ESCore&, uint64_t, const ComponentGroup<Ts>&... groups)
+  virtual void groupExecute(CoreInt&, uint64_t, const ComponentGroup<Ts>&... groups)
   {
     std::cerr << "cpm-entity-system: Unimplmented system group execute." << std::endl;
     throw std::runtime_error("cpm-entity-system: Unimplemented system group execute.");
@@ -904,11 +905,11 @@ public:
 
   /// This function gets called before we start walking components from the
   /// walkComponents function.
-  virtual void preWalkComponents(ESCore& core)            {}
+  virtual void preWalkComponents(CoreInt& core)            {}
 
   /// This function gets called after we finish walking components from the
   /// walkComponents function.
-  virtual void postWalkComponents(ESCore& core)           {}
+  virtual void postWalkComponents(CoreInt& core)           {}
 };
 
 namespace optional_components_impl

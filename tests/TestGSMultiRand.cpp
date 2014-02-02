@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <ctime>
@@ -212,7 +213,7 @@ template <typename... Ts>
 class TestSystem : public es::GenericSystem<false, Ts...>
 {
 public:
-  void execute(es::ESCore&, uint64_t entityID, const Ts*... args)
+  void execute(es::CoreInt&, uint64_t entityID, const Ts*... args)
   {
     // Detect any failed components that should not be tested.
     std::array<bool, sizeof...(Ts)> detectFailures = {{

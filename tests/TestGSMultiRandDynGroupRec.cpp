@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <ctime>
@@ -507,7 +508,7 @@ public:
     return totalNumExecutions;
   }
 
-  void execute(es::ESCore&, uint64_t entityID, const Ts*... args)
+  void execute(es::CoreInt&, uint64_t entityID, const Ts*... args)
   {
     executedItems.push_back(entityID);
     ++numExecutions;

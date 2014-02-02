@@ -97,7 +97,7 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void execute(uint64_t entityID, CompPosition* pos, CompHomPos* homPos, CompGameplay* gp) override
+  void execute(es::CoreInt&, uint64_t entityID, CompPosition* pos, CompHomPos* homPos, CompGameplay* gp) override
   {
     std::cout << "Executing " << entityID << std::endl;
     std::cout << "(" << pos->position.x << "," << pos->position.y << "," << pos->position.z << ")" << std::endl;

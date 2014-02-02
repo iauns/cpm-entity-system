@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -150,7 +151,7 @@ public:
     return es::OptionalComponents<CompHomPos, CompPosition>(templateID);
   }
 
-  void execute(es::ESCore&, uint64_t entityID, const CompStaticLightDir* dir, const CompPosition* pos, 
+  void execute(es::CoreInt&, uint64_t entityID, const CompStaticLightDir* dir, const CompPosition* pos, 
                const CompStaticCamera* cam, const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCall;

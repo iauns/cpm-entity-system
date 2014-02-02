@@ -1,5 +1,5 @@
-#ifndef IAUNS_ENTITY_SYSTEM_CONTAINER_MAP_INTERFACE_HPP
-#define IAUNS_ENTITY_SYSTEM_CONTAINER_MAP_INTERFACE_HPP
+#ifndef IAUNS_ENTITY_SYSTEM_CORE_INTERFACE_HPP
+#define IAUNS_ENTITY_SYSTEM_CORE_INTERFACE_HPP
 
 #include <functional>
 #include <iostream>
@@ -14,16 +14,16 @@ namespace CPM_ES_NS {
 /// Abstract interface that contains all functions necessary for GenericSystem
 /// to correctly iterate over a group of components.
 
-class ContainerMapInterface
+class CoreInt
 {
 public:
-  virtual ~ContainerMapInterface()    {}
+  virtual ~CoreInt()    {}
 
   //----------------------------------------------------------------------------
   // Required functions
   //----------------------------------------------------------------------------
 
-  /// When called, ContainerMapInterface should take ownership of the component
+  /// When called, CoreInt should take ownership of the component
   /// container (BaseComponentContainer). Should issue a warning and refuse
   /// to add (and delete) \p component if there is already a pre-existing
   /// container. Used to automatically add containers via GenericSystem.

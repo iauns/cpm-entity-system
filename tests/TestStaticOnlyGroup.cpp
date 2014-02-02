@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -56,7 +57,7 @@ public:
 
   static int numCall;
 
-  void groupExecute(es::ESCore&, uint64_t /* entityID */,
+  void groupExecute(es::CoreInt&, uint64_t /* entityID */,
                     const es::ComponentGroup<CompStaticLightDir>& lightDir,
                     const es::ComponentGroup<CompStaticCamera>& cam) override
   {

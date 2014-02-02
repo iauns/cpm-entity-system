@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -103,7 +104,7 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void groupExecute(es::ESCore&, uint64_t entityID, 
+  void groupExecute(es::CoreInt&, uint64_t entityID, 
                     const es::ComponentGroup<CompPosition>& pos,
                     const es::ComponentGroup<CompHomPos>&   homPos,
                     const es::ComponentGroup<CompGameplay>& gp) override

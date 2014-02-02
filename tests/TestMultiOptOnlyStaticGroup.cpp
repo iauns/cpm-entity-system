@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -140,7 +141,7 @@ public:
 
   bool isComponentOptional(uint64_t /* templateID */) {return true;}
 
-  void groupExecute(es::ESCore&, uint64_t entityID,
+  void groupExecute(es::CoreInt&, uint64_t entityID,
                     const es::ComponentGroup<CompStaticLightDir>& dir,
                     const es::ComponentGroup<CompPosition>& pos,
                     const es::ComponentGroup<CompStaticCamera>& cam,

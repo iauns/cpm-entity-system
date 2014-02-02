@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <glm/glm.hpp>
@@ -107,7 +108,7 @@ public:
   static int numEntity3Calls;
   static int numEntity4Calls;
 
-  void execute(es::ESCore&, uint64_t entityID, const CompPosition* pos,
+  void execute(es::CoreInt&, uint64_t entityID, const CompPosition* pos,
                const CompHomPos* homPos, const CompGameplay* gp) override
   {
     // Check to see if this entityID should have been executed.

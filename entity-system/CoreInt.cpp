@@ -29,25 +29,25 @@
 /// \author James Hughes
 /// \date   January 2014
 
-#include "ContainerMapInterface.hpp"
+#include "CoreInt.hpp"
 
 namespace CPM_ES_NS {
 
-EmptyComponentContainer ContainerMapInterface::mEmptyContainer;
+EmptyComponentContainer CoreInt::mEmptyContainer;
 
-void ContainerMapInterface::removeFirstComponent(uint64_t entityID, uint64_t compTemplateID)
+void CoreInt::removeFirstComponent(uint64_t entityID, uint64_t compTemplateID)
 {
   BaseComponentContainer* cont = getComponentContainer(compTemplateID);
   cont->removeFirstSequence(entityID);
 }
 
-void ContainerMapInterface::removeLastComponent(uint64_t entityID, uint64_t compTemplateID)
+void CoreInt::removeLastComponent(uint64_t entityID, uint64_t compTemplateID)
 {
   BaseComponentContainer* cont = getComponentContainer(compTemplateID);
   cont->removeLastSequence(entityID);
 }
 
-void ContainerMapInterface::removeAllComponents(uint64_t entityID, uint64_t compTemplateID)
+void CoreInt::removeAllComponents(uint64_t entityID, uint64_t compTemplateID)
 {
   BaseComponentContainer* cont = getComponentContainer(compTemplateID);
   cont->removeSequence(entityID);

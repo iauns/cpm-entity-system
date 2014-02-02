@@ -1,5 +1,6 @@
 
 #include <entity-system/GenericSystem.hpp>
+#include <entity-system/ESCore.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 #include <ctime>
@@ -501,7 +502,7 @@ public:
     return totalNumExecutions;
   }
 
-  void groupExecute(es::ESCore&, uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
+  void groupExecute(es::CoreInt&, uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
   {
     executedItems.push_back(entityID);
     ++numExecutions;
