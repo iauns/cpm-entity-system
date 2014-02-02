@@ -130,7 +130,14 @@ struct ComponentGroup
     // Modify value by storing index, in raw array, to modified component.
     // This index will be used when re-integrating changes made at the end
     // of the frame.
-    container->modifyIndex(val, containerIndex + componentNum, priority);
+    if (container != nullptr)
+    {
+      container->modifyIndex(val, containerIndex + componentNum, priority);
+    }
+    else
+    {
+      std::cerr << "Attempted to modify non-existante container!" << std::endl;
+    }
   }
 
   std::size_t numComponents;
@@ -139,7 +146,7 @@ struct ComponentGroup
   // The following two variables are only used when modify is called. Used
   // to modify the value of the component.
   size_t containerIndex;
-  ComponentContainer<T>* container;
+  ComponentContainer<T>* container; // Can be a nullptr.
 };
 
 } // namespace CPM_ES_NS 

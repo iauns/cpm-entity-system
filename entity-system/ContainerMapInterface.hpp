@@ -7,6 +7,7 @@
 
 #include "BaseSystem.hpp"
 #include "src/ComponentContainer.hpp"
+#include "src/EmptyComponentContainer.hpp"
 
 namespace CPM_ES_NS {
 
@@ -70,6 +71,11 @@ public:
   void removeLastComponent(uint64_t entityID, uint64_t compTemplateID);
   /// @}
 
+  /// Retrieve static dummy empty BaseComponentContainer implementation.
+  static BaseComponentContainer* getEmptyContainer() {return static_cast<BaseComponentContainer*>(&mEmptyContainer);}
+
+private:
+  static EmptyComponentContainer mEmptyContainer;
 };
 
 } // namespace CPM_ES_NS

@@ -1,6 +1,7 @@
 #ifndef IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 #define IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 
+// DEPRECATED
 class ESSerialize;
 
 namespace CPM_ES_NS {
@@ -64,7 +65,6 @@ public:
   virtual uint64_t getSequenceFromIndex(int index) = 0;
 
   static const int StaticEntID = 1;
-
 };
 
 } // namespace CPM_ES_NS 

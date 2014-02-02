@@ -33,6 +33,7 @@ public:
   BaseComponentContainer* getComponentContainer(uint64_t component) override;
 
   /// Iterates over all containers. No ordering is presumed.
+  /// DEPRECATED
   void iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb) override;
 
   /// Clears out all component containers (deletes all entities).

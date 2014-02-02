@@ -33,6 +33,8 @@
 
 namespace CPM_ES_NS {
 
+EmptyComponentContainer ContainerMapInterface::mEmptyContainer;
+
 void ContainerMapInterface::removeFirstComponent(uint64_t entityID, uint64_t compTemplateID)
 {
   BaseComponentContainer* cont = getComponentContainer(compTemplateID);

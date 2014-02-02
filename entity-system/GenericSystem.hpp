@@ -53,45 +53,6 @@ void call(ESCore& core, uint64_t sequence, C c, F f, Tuple && t)
   call_impl<C, F, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value>::call(core, sequence, c, f, std::forward<Tuple>(t));
 }
 
-
-
-/// DEPRECATED: init_impl::ensureContainersPresent must be removed.
-/// GenericSystem does not have enough information to create component
-/// containers of the appropriate type. ContainerMapInterface, which all
-/// instances of ESCore will be replaced with will also not have enough
-/// information in order to call addComponentContainer. A new call that will
-/// return a dummy empty component container will be used instead of relying
-/// on the existence of all containers before starting our walking algorithms.
-template <typename... RTs>
-struct init_impl;
-
-template <typename RT, typename... RTs>
-struct init_impl<RT, RTs...>
-{
-  static bool ensureContainersPresent(ESCore* core)
-  {
-    // Check to see if component is already present. If not, then we should
-    // add the component default reserve, if any.
-    if (!core->hasComponentContainer(TemplateID<RT>::getID()))
-    {
-      core->addComponentContainer(new ComponentContainer<RT>(), TemplateID<RT>::getID());
-    }
-
-    return init_impl<RTs...>::ensureContainersPresent(core);
-  }
-};
-
-template <>
-struct init_impl<>
-{
-  static bool ensureContainersPresent(ESCore* core)
-  {
-    return true;
-  }
-};
-
-
-
 }
 
 /// See: http://stackoverflow.com/questions/18986560/check-variadic-templates-parameters-for-uniqueness?lq=1
@@ -134,27 +95,32 @@ public:
     if (sizeof...(Ts) == 0)
       return false;
 
-    // Ensure all component containers have been created.
-    // Even if a component cointainer is empty doesn't mean that it is not
-    // associated with an optional component.
-    gs_detail::init_impl<Ts...>::ensureContainersPresent(&core);
-
-    std::array<int, sizeof...(Ts)> indices = { dynamic_cast<ComponentContainer<Ts>*>(core.getComponentContainer(TemplateID<Ts>::getID()))->getComponentItemIndexWithSequence(entityID)... };
+    std::array<BaseComponentContainer*, sizeof...(Ts)> baseComponents = { core.getComponentContainer(TemplateID<Ts>::getID())... };
+    std::array<int, sizeof...(Ts)> indices;
     std::array<int, sizeof...(Ts)> nextIndices;
-    std::array<bool, sizeof...(Ts)> isStatic = { core.getComponentContainer(TemplateID<Ts>::getID())->isStatic()... };
-    std::array<int, sizeof...(Ts)> numComponents = { core.getComponentContainer(TemplateID<Ts>::getID())->getNumComponents()... };
+    std::array<bool, sizeof...(Ts)> isStatic;
+    std::array<int, sizeof...(Ts)> numComponents;
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
-    std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays = std::make_tuple(
-        dynamic_cast<ComponentContainer<Ts>*>(
-            core.getComponentContainer(TemplateID<Ts>::getID()))->getComponentArray()...);
+    // Build component arrays minding the possibility that baseComponents can
+    // contain nullptr data.
+    std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays;
+    BuildComponentArraysAndIndicesWithID<0, Ts...>::exec(baseComponents, componentArrays, indices, entityID);
 
     std::tuple<Ts*...> values;  ///< Values that will be passed into execute.
     std::tuple<ComponentGroup<Ts>...> groupValues;  ///< Grouped values that will be passed into group execute.
 
+    AddComponentsToGroupInputs<0, Ts...>::exec(core, baseComponents, groupValues);
+
     bool execute = true;
-    for (int i = 0; i < indices.size(); i++)
+    for (int i = 0; i < sizeof...(Ts); i++)
     {
+      if (baseComponents[i] == nullptr)
+        baseComponents[i] = ContainerMapInterface::getEmptyContainer();
+
+      isStatic[i] = baseComponents[i]->isStatic();
+      numComponents[i] = baseComponents[i]->getNumComponents();
+
       // Note: For static components, getComponentItemIndexWithSequence always
       //       returns 0. Which is the correct index to start at.
       if (indices[i] == -1)
@@ -205,11 +171,6 @@ public:
     if (sizeof...(Ts) == 0)
       return;
 
-    // Ensure all component containers have been created.
-    // Even if a component cointainer is empty doesn't mean that it is not
-    // associated with an optional component.
-    gs_detail::init_impl<Ts...>::ensureContainersPresent(&core);
-
     /// \todo Remove excess calls to getComponentContainer. There should only
     ///       be one call made to getComponentContainer. Also think about
     ///       caching the component containers.
@@ -220,6 +181,10 @@ public:
     std::array<bool, sizeof...(Ts)> isStatic;
     std::array<bool, sizeof...(Ts)> optionalComponents = { isComponentOptional(TemplateID<Ts>::getID())... }; // Detect optional components via overriden function call (simplest).
 
+    // Arrays containing components arrays.
+    std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays;
+    BuildComponentArrays<0, Ts...>::exec(baseComponents, componentArrays);
+
     // Start off with std::numeric_limits max on lowest upper sequence,
     // and check for optional components. No optional components are allowed
     // to be the leading sequence. If all we find are optional components,
@@ -229,8 +194,11 @@ public:
     uint64_t lowestUpperSequence = std::numeric_limits<uint64_t>::max();
     int leadingComponent = -1;
     int numOptionalComponents = 0;
-    for (int i = 0; i < baseComponents.size(); ++i)
+    for (int i = 0; i < sizeof...(Ts); ++i)
     {
+      if (baseComponents[i] == nullptr)
+        baseComponents[i] = ContainerMapInterface::getEmptyContainer();
+
       bool optional = optionalComponents[i];
       // An empty mandatory component results in an immediate termination
       // of the walk. Even if the component is static.
@@ -253,15 +221,10 @@ public:
       }
     }
 
-    // Arrays containing components.
-    std::tuple<typename ComponentContainer<Ts>::ComponentItem*...> componentArrays = std::make_tuple(
-        dynamic_cast<ComponentContainer<Ts>*>(
-            core.getComponentContainer(TemplateID<Ts>::getID()))->getComponentArray()...);
-
     std::tuple<Ts*...> values;                      ///< Values that will be passed into execute.
     std::tuple<ComponentGroup<Ts>...> groupValues;  ///< Grouped values that will be passed into group execute.
 
-    AddComponentsToGroupInputs<0, Ts...>::exec(core, groupValues);
+    AddComponentsToGroupInputs<0, Ts...>::exec(core, baseComponents, groupValues);
 
     // leadingComponent == -1 if and only if the number of optional and static
     // components == sizeof...(Ts). Because the if statement following the
@@ -502,6 +465,7 @@ public:
                      const std::array<bool, sizeof...(Ts)>& componentStatic,
                      const std::array<int, sizeof...(Ts)>& componentSizes)
     {
+      // array may be a nullptr!
       typename ComponentContainer<RT>::ComponentItem* array = std::get<TupleIndex>(componentArrays);
       bool isStatic     = componentStatic[TupleIndex];
 
@@ -534,23 +498,103 @@ public:
   };
 
   template <int TupleIndex, typename... RTs>
+  struct BuildComponentArrays;
+
+  template <int TupleIndex, typename RT, typename... RTs>
+  struct BuildComponentArrays<TupleIndex, RT, RTs...>
+  {
+    static void exec(
+        std::array<BaseComponentContainer*, sizeof...(Ts)>& baseComponents,
+        std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays)
+    {
+      if (baseComponents[TupleIndex] != nullptr)
+      {
+        std::get<TupleIndex>(componentArrays) =
+            dynamic_cast<ComponentContainer<RT>*>(baseComponents[TupleIndex])->getComponentArray();
+      }
+      else
+      {
+        std::get<TupleIndex>(componentArrays) = nullptr;
+      }
+      BuildComponentArrays<TupleIndex + 1, RTs...>::exec(baseComponents, componentArrays);
+    }
+  };
+
+  template <int TupleIndex>
+  struct BuildComponentArrays<TupleIndex>
+  {
+    static void exec(
+        std::array<BaseComponentContainer*, sizeof...(Ts)>&,
+        std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>&)
+    {}
+  };
+
+  template <int TupleIndex, typename... RTs>
+  struct BuildComponentArraysAndIndicesWithID;
+
+  template <int TupleIndex, typename RT, typename... RTs>
+  struct BuildComponentArraysAndIndicesWithID<TupleIndex, RT, RTs...>
+  {
+    static void exec(
+        std::array<BaseComponentContainer*, sizeof...(Ts)>& baseComponents,
+        std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>& componentArrays,
+        std::array<int, sizeof...(Ts)>& indices, uint64_t entityID)
+    {
+      if (baseComponents[TupleIndex] != nullptr)
+      {
+        ComponentContainer<RT>* derived = dynamic_cast<ComponentContainer<RT>*>(baseComponents[TupleIndex]);
+
+        std::get<TupleIndex>(componentArrays) = derived->getComponentArray();
+        int foundIndex = derived->getComponentItemIndexWithSequence(entityID);
+        indices[TupleIndex] = foundIndex;
+      }
+      else
+      {
+        std::get<TupleIndex>(componentArrays) = nullptr;
+        indices[TupleIndex] = 0;
+      }
+      BuildComponentArraysAndIndicesWithID<TupleIndex + 1, RTs...>::exec(
+          baseComponents, componentArrays, indices, entityID);
+    }
+  };
+
+  template <int TupleIndex>
+  struct BuildComponentArraysAndIndicesWithID<TupleIndex>
+  {
+    static void exec(
+        std::array<BaseComponentContainer*, sizeof...(Ts)>&,
+        std::tuple<typename ComponentContainer<Ts>::ComponentItem*...>&,
+        std::array<int, sizeof...(Ts)>&, uint64_t)
+    {}
+  };
+
+  template <int TupleIndex, typename... RTs>
   struct AddComponentsToGroupInputs;
 
   template <int TupleIndex, typename RT, typename... RTs>
   struct AddComponentsToGroupInputs<TupleIndex, RT, RTs...>
   {
-    static void exec(ESCore& core, std::tuple<ComponentGroup<Ts>...>& input)
+    static void exec(ESCore& core, std::array<BaseComponentContainer*, sizeof...(Ts)>& baseComponents,
+                     std::tuple<ComponentGroup<Ts>...>& input)
     {
-      std::get<TupleIndex>(input).container 
-          = dynamic_cast<ComponentContainer<RT>*>(core.getComponentContainer(TemplateID<RT>::getID()));
-      AddComponentsToGroupInputs<TupleIndex + 1, RTs...>::exec(core, input);
+      if (baseComponents[TupleIndex] != nullptr)
+      {
+        std::get<TupleIndex>(input).container 
+            = dynamic_cast<ComponentContainer<RT>*>(core.getComponentContainer(TemplateID<RT>::getID()));
+      }
+      else
+      {
+        std::get<TupleIndex>(input).container = nullptr;
+      }
+      AddComponentsToGroupInputs<TupleIndex + 1, RTs...>::exec(core, baseComponents, input);
     }
   };
 
   template <int TupleIndex>
   struct AddComponentsToGroupInputs<TupleIndex>
   {
-    static void exec(ESCore& /* core */, std::tuple<ComponentGroup<Ts>...>& /* input */) {}
+    static void exec(ESCore& /* core */, std::array<BaseComponentContainer*, sizeof...(Ts)>& /* baseComponents */,
+                     std::tuple<ComponentGroup<Ts>...>& /* input */) {}
   };
 
   template <int TupleIndex, typename... RTs>
@@ -592,7 +636,7 @@ public:
       }
       else
       {
-        // Only pass target sequence 
+        // Only pass target sequence. We won't get here if arraySize == 0.
         if (array[currentIndex].sequence != targetSequence || isStatic)
         {
           if (isStatic && arraySize > 0)
@@ -626,7 +670,7 @@ public:
       // passed nullptr in as its parameter.
       if (!isStatic)
       {
-        if (array[currentIndex].sequence == targetSequence)
+        if (array && array[currentIndex].sequence == targetSequence)
           ++currentIndex;
 
         if (currentIndex == arraySize)
@@ -642,6 +686,7 @@ public:
           else
             return false;
         }
+
         // Loop until we find a sequence that is not in our target.
         while (array[currentIndex].sequence == targetSequence)
         {
@@ -750,7 +795,9 @@ public:
       }
       else
       {
-        // Only pass target sequence 
+        // Only pass target sequence. array may be a nullptr, but we will never
+        // reach this condition if that is the case. arraySize will be 0 as will
+        // be currentIndex.
         if (array[currentIndex].sequence != targetSequence || isStatic)
         {
           if (isStatic && arraySize > 0)
