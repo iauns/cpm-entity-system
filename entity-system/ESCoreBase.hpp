@@ -37,10 +37,6 @@ public:
   /// the TemplateID class.
   BaseComponentContainer* getComponentContainer(uint64_t component);
 
-  /// Iterates over all containers. No ordering is presumed.
-  /// DEPRECATED
-  void iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb);
-
   /// Clears out all component containers (deletes all entities).
   void clearAllComponentContainers();
 
@@ -130,8 +126,6 @@ protected:
   template <typename T, class CompCont = ComponentContainer<T>>
   void coreAddComponent(uint64_t entityID, const T& component)
   {
-    /// \todo Ensure that we do not attempt to add components to a static
-    ///       container -- write to cerr.
     if (entityID == 0)
     {
       std::cerr << "cpm-entity-system: Attempting to add a component of entityID 0! Not allowed." << std::endl;

@@ -88,10 +88,6 @@ public:
 
   bool walkEntity(ESCoreBase& core, uint64_t entityID) override
   {
-    /// \todo Remove excess calls to getComponentContainer. There should only
-    ///       be one call made to getComponentContainer. Also think about
-    ///       caching the component containers. Note: This won't be an issue
-    ///       if we make the component container a flat array.
     if (sizeof...(Ts) == 0)
       return false;
 
@@ -171,9 +167,6 @@ public:
     if (sizeof...(Ts) == 0)
       return;
 
-    /// \todo Remove excess calls to getComponentContainer. There should only
-    ///       be one call made to getComponentContainer. Also think about
-    ///       caching the component containers.
     std::array<BaseComponentContainer*, sizeof...(Ts)> baseComponents = { core.getComponentContainer(TemplateID<Ts>::getID())... };
     std::array<int, sizeof...(Ts)> indices;
     std::array<int, sizeof...(Ts)> nextIndices;
@@ -340,9 +333,9 @@ public:
       // to walk the components.
 
       // Create the target sequence list by recursing through our parameters.
-      /// \todo Optimize? Set will cause dynamic memory allocation. *But*, this
-      ///       is only a corner case and very few, if any, systems need
-      ///       this case where all components are optional.
+      /// Optimize? Set will cause dynamic memory allocation. *But*, this
+      /// is only a corner case and very few, if any, systems need
+      /// this case where all components are optional.
       std::set<uint64_t> sequenceSet;
       GenSequenceSet<0, Ts...>::exec(sequenceSet, componentArrays,
                                      isStatic, numComponents);
@@ -876,14 +869,6 @@ public:
       return true;
     }
   };
-
-  /// \todo Figure out how to get the compiler to issue an error if either of
-  ///       these functions is unimplemented. We could do this with template
-  ///       specialization on GroupComponents, but that would be a lot of
-  ///       code reuse. We could also make generic system accept a class
-  ///       which it will inspect to see if it has the appropriate methods.
-  ///       Neither sounds good (until something like N3596 is adopted).
-  ///       So we opt for a runtime exception instead.
 
   // Non-grouped version of execute.
   virtual void execute(ESCoreBase&, uint64_t, const Ts*... vs)

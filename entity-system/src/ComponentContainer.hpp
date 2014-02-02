@@ -77,9 +77,6 @@ public:
       this->component = comp;
     }
 
-    /// \todo Overload * operator to retrieve component. This is so we mimic
-    ///       STL containers almost completely.
-
     uint64_t  sequence;   ///< Commonly used element in the first cacheline.
     T         component;  ///< Copy constructable component data.
   };
@@ -149,7 +146,6 @@ public:
     }
   }
 
-  /// \todo Use std::optional here when we have access to it.
   /// Retrieves component with the indicated sequence.
   const T* getComponentWithSequence(uint64_t sequence)
   {

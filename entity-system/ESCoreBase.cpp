@@ -72,16 +72,6 @@ BaseComponentContainer* ESCoreBase::getComponentContainer(uint64_t component)
     return nullptr;
 }
 
-/// Iterates over all containers. No ordering is presumed.
-/// DEPRECATED
-void ESCoreBase::iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb)
-{
-  for (auto it = mComponents.begin(); it != mComponents.end(); ++it)
-  {
-    cb(it->second);
-  }
-}
-
 /// Clears out all component containers (deletes all entities).
 void ESCoreBase::clearAllComponentContainers()
 {
