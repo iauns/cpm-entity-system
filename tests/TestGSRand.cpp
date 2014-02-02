@@ -80,7 +80,7 @@ public:
   static std::map<uint64_t, bool> invalidComponents;
   static std::vector<uint64_t> calledEntities;
 
-  void execute(es::CoreInt&, uint64_t entityID,
+  void execute(es::ESCoreBase&, uint64_t entityID,
                const CompPosition* pos, const CompHomPos* homPos,
                const CompGameplay* gp) override
   {

@@ -589,7 +589,7 @@ public:
     return totalNumExecutions;
   }
 
-  void groupExecute(es::CoreInt&, uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
+  void groupExecute(es::ESCoreBase&, uint64_t entityID, const es::ComponentGroup<Ts>&... groups) override
   {
     executedItems.push_back(entityID);
     ++numExecutions;

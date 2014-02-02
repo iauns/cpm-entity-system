@@ -3,7 +3,7 @@
 
 namespace CPM_ES_NS {
 
-class CoreInt;
+class ESCoreBase;
 
 class BaseSystem
 {
@@ -11,8 +11,8 @@ public:
   BaseSystem() {}
   virtual ~BaseSystem() {}
   
-  virtual void walkComponents(CoreInt& core) = 0;
-  virtual bool walkEntity(CoreInt& core, uint64_t entityID) = 0;
+  virtual void walkComponents(ESCoreBase& core) = 0;
+  virtual bool walkEntity(ESCoreBase& core, uint64_t entityID) = 0;
 
   virtual const char* getID() {return nullptr;}
 };

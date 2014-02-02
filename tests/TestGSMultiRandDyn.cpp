@@ -250,7 +250,7 @@ template <typename... Ts>
 class TestSystem : public es::GenericSystem<false, Ts...>
 {
 public:
-  void execute(es::CoreInt&, uint64_t entityID, const Ts*... args)
+  void execute(es::ESCoreBase&, uint64_t entityID, const Ts*... args)
   {
     executedItems.push_back(entityID);
     

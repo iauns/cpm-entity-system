@@ -6,8 +6,8 @@
 #include <iostream>
 #include <stdexcept>
 #include "BaseSystem.hpp"
-#include "CoreInt.hpp"
 #include "src/ComponentContainer.hpp"
+#include "src/EmptyComponentContainer.hpp"
 
 namespace CPM_ES_NS {
 
@@ -19,27 +19,27 @@ namespace CPM_ES_NS {
 /// for an example implementation. I cannot enforce the existence of template
 /// functions in a derived class, but this class is fairly useless without
 /// the ability to add components.
-class ESCoreBase : public CoreInt
+class ESCoreBase
 {
 public:
   ESCoreBase() : mCurSequence(0) {}
   virtual ~ESCoreBase() {clearAllComponentContainers();}
 
   /// Returns false if the component doesn't exist.
-  bool hasComponentContainer(uint64_t componentID) override;
+  bool hasComponentContainer(uint64_t componentID);
 
   /// When called, ESCoreBase takes ownership of \p component.
   /// Adds a new component to the system. If a component of the same
   /// TypeID already exists, the request is ignored.
-  void addComponentContainer(BaseComponentContainer* componentCont, uint64_t componentID) override;
+  void addComponentContainer(BaseComponentContainer* componentCont, uint64_t componentID);
 
   /// Retrieves a base component container. Component is the output from
   /// the TemplateID class.
-  BaseComponentContainer* getComponentContainer(uint64_t component) override;
+  BaseComponentContainer* getComponentContainer(uint64_t component);
 
   /// Iterates over all containers. No ordering is presumed.
   /// DEPRECATED
-  void iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb) override;
+  void iterateOverContainers(std::function<void(BaseComponentContainer*)>& cb);
 
   /// Clears out all component containers (deletes all entities).
   void clearAllComponentContainers();
@@ -54,6 +54,25 @@ public:
   /// Removes all components associated with entity.
   virtual void removeEntity(uint64_t entityID);
 
+  /// Removes all components with their entityID equal to \p entityID, but only
+  /// within the \p compTemplateID component (the compTemplateID identifier
+  /// comes from the TemplateID<> class).
+  void removeAllComponents(uint64_t entityID, uint64_t compTemplateID);
+
+  /// NOTE: If you use either of the following functions, it is highly advised
+  ///       that you renormalize with stableSort = true! This ensures that
+  ///       your logic regarding what component comes first / last, when
+  ///       entityIDs are the same, is valid. Stable sort is slower than a
+  ///       regular sort, so only use it when necessary.
+  /// @{
+  /// Removes the first component with the given entityID associated with the
+  /// given \p compTemplateID (the unique identifier for the component type,
+  /// from the TemplateID<> class).
+  void removeFirstComponent(uint64_t entityID, uint64_t compTemplateID);
+
+  /// Removes the last component with the given \p compTemplateID.
+  void removeLastComponent(uint64_t entityID, uint64_t compTemplateID);
+  /// @}
 
   /// Retrieves the list of static components. You can modify these values at
   /// will until renormalize is called. Use this to update the values of static
@@ -93,6 +112,9 @@ public:
       return nullptr;
     }
   }
+
+  /// Retrieve static dummy empty BaseComponentContainer implementation.
+  static BaseComponentContainer* getEmptyContainer() {return static_cast<BaseComponentContainer*>(&mEmptyContainer);}
 
   // Note: getNewEntityID is a deprecated function that will be removed in a
   // future version of the entity system.
@@ -153,6 +175,8 @@ protected:
 
   std::map<uint64_t, BaseComponentContainer*> mComponents;
   uint64_t                                    mCurSequence;
+
+  static EmptyComponentContainer mEmptyContainer;
 };
 
 } // namespace CPM_ES_NS 

@@ -105,17 +105,17 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void preWalkComponents(es::CoreInt& /* core */)
+  void preWalkComponents(es::ESCoreBase& /* core */)
   {
     ++preWalkCalls;    
   }
 
-  void postWalkComponents(es::CoreInt& /* core */)
+  void postWalkComponents(es::ESCoreBase& /* core */)
   {
     ++postWalkCalls;
   }
 
-  void execute(es::CoreInt&, uint64_t entityID, const CompPosition* pos, 
+  void execute(es::ESCoreBase&, uint64_t entityID, const CompPosition* pos, 
                const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCalls;

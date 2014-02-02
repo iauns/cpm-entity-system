@@ -104,7 +104,7 @@ public:
 
   static std::map<uint64_t, bool> invalidComponents;
 
-  void groupExecute(es::CoreInt&, uint64_t entityID, 
+  void groupExecute(es::ESCoreBase&, uint64_t entityID, 
                     const es::ComponentGroup<CompPosition>& pos,
                     const es::ComponentGroup<CompHomPos>&   homPos,
                     const es::ComponentGroup<CompGameplay>& gp) override

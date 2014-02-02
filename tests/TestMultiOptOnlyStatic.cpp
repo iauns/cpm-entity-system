@@ -144,7 +144,7 @@ public:
     return true;
   }
 
-  void execute(es::CoreInt&, uint64_t entityID, const CompStaticLightDir* dir, const CompPosition* pos, 
+  void execute(es::ESCoreBase&, uint64_t entityID, const CompStaticLightDir* dir, const CompPosition* pos, 
                const CompStaticCamera* cam, const CompHomPos* homPos, const CompGameplay* gp) override
   {
     ++numCall;

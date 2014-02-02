@@ -33,6 +33,8 @@
 
 namespace CPM_ES_NS {
 
+EmptyComponentContainer ESCoreBase::mEmptyContainer;
+
 bool ESCoreBase::hasComponentContainer(uint64_t componentID)
 {
   auto it = mComponents.find(componentID);
@@ -105,6 +107,24 @@ void ESCoreBase::removeEntity(uint64_t entityID)
 {
   for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
     iter->second->removeSequence(entityID);
+}
+
+void ESCoreBase::removeFirstComponent(uint64_t entityID, uint64_t compTemplateID)
+{
+  BaseComponentContainer* cont = getComponentContainer(compTemplateID);
+  cont->removeFirstSequence(entityID);
+}
+
+void ESCoreBase::removeLastComponent(uint64_t entityID, uint64_t compTemplateID)
+{
+  BaseComponentContainer* cont = getComponentContainer(compTemplateID);
+  cont->removeLastSequence(entityID);
+}
+
+void ESCoreBase::removeAllComponents(uint64_t entityID, uint64_t compTemplateID)
+{
+  BaseComponentContainer* cont = getComponentContainer(compTemplateID);
+  cont->removeSequence(entityID);
 }
 
 } // namespace CPM_ES_NS

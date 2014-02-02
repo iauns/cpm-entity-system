@@ -139,7 +139,7 @@ class BasicSystem : public es::GenericSystem<false, CompPosition, CompHomPos, Co
 {
 public:
 
-  void execute(es::CoreInt&, uint64_t entityID,
+  void execute(es::ESCoreBase&, uint64_t entityID,
                const CompPosition* pos, const CompHomPos* homPos,
                const CompGameplay* gp) override
   {

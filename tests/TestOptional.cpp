@@ -108,7 +108,7 @@ public:
     return es::OptionalComponents<CompHomPos>(templateID);
   }
 
-  void execute(es::CoreInt&, uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
+  void execute(es::ESCoreBase&, uint64_t entityID, const CompPosition* pos, const CompHomPos* homPos,
                const CompGameplay* gp) override
   {
     // Check to see if this entityID should have been executed.

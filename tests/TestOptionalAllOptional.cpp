@@ -113,7 +113,7 @@ public:
     return true;
   }
 
-  void execute(es::CoreInt&, uint64_t entityID, const CompPosition* pos,
+  void execute(es::ESCoreBase&, uint64_t entityID, const CompPosition* pos,
                const CompHomPos* homPos, const CompGameplay* gp) override
   {
     if (pos == nullptr) ++posNull;
