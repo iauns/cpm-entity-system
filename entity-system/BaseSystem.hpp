@@ -8,13 +8,11 @@ class ESCoreBase;
 class BaseSystem
 {
 public:
-  BaseSystem() {}
+  BaseSystem()          {}
   virtual ~BaseSystem() {}
   
   virtual void walkComponents(ESCoreBase& core) = 0;
   virtual bool walkEntity(ESCoreBase& core, uint64_t entityID) = 0;
-
-  virtual const char* getID() {return nullptr;}
 };
 
 } // namespace CPM_ES_NS
