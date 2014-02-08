@@ -373,6 +373,13 @@ public:
     mRemovals.emplace_back(sequence, REMOVE_LAST);
   }
 
+  void removeAll() override
+  {
+    mComponents.clear();
+    mRemovals.clear();
+    mModifications.clear();
+  }
+
   ComponentItem* getComponentArray()
   {
     if (mComponents.size() != 0)

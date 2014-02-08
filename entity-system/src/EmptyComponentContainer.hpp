@@ -14,6 +14,7 @@ public:
   uint64_t getLowerSequence() override {return 0;}
   uint64_t getUpperSequence() override {return 0;}
   uint64_t getNumComponents() override {return 0;}
+  void removeAll() override {}
   void removeSequence(uint64_t) override {}
   void removeFirstSequence(uint64_t) override {}
   void removeLastSequence(uint64_t) override {}

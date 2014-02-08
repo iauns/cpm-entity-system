@@ -23,7 +23,7 @@ class ESCoreBase
 {
 public:
   ESCoreBase() : mCurSequence(0) {}
-  virtual ~ESCoreBase() {clearAllComponentContainers();}
+  virtual ~ESCoreBase() {deleteAllComponentContainers();}
 
   /// Returns false if the component doesn't exist.
   bool hasComponentContainer(uint64_t componentID);
@@ -120,6 +120,9 @@ public:
   uint64_t getNewEntityID() {return ++mCurSequence;}
 
 protected:
+
+  /// Deletes all component containers.
+  void deleteAllComponentContainers();
 
   /// Adds a component. If a component container already exists, then that is
   /// used. Otherwise, a new component container is created and used.

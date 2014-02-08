@@ -76,6 +76,12 @@ BaseComponentContainer* ESCoreBase::getComponentContainer(uint64_t component)
 void ESCoreBase::clearAllComponentContainers()
 {
   for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+    iter->second->removeAll();
+}
+
+void ESCoreBase::deleteAllComponentContainers()
+{
+  for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
     delete iter->second;
 
   mComponents.clear();
