@@ -378,6 +378,11 @@ public:
     mComponents.clear();
     mRemovals.clear();
     mModifications.clear();
+
+    // Clear state related to mComponents.
+    mLastSortedSize = 0;
+    mUpperSequence = 0;
+    mLowerSequence = 0;
   }
 
   ComponentItem* getComponentArray()
