@@ -58,10 +58,7 @@ public:
   {
     // Remove all componnts, and if their destructors exist, call those
     // as well.
-    for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
-    {
-      cc_detail::maybe_component_destruct(it->component, it->sequence, 0);
-    }
+    removeAll();
   }
 
   /// Item that represents one component paired with a sequence.
@@ -375,6 +372,11 @@ public:
 
   void removeAll() override
   {
+    for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
+    {
+      cc_detail::maybe_component_destruct(it->component, it->sequence, 0);
+    }
+
     mComponents.clear();
     mRemovals.clear();
     mModifications.clear();
