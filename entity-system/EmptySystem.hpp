@@ -41,9 +41,6 @@ namespace CPM_ES_NS {
 class EmptySystem : public BaseSystem
 {
 public:
-  EmptySystem();
-  virtual ~EmptySystem();
-
   /// Abstract functions.
   virtual void execute(ESCoreBase& core) = 0;
 
