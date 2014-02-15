@@ -31,6 +31,9 @@ public:
   /// Removes the last component found that is associated with 'sequence'.
   virtual void removeLastSequence(uint64_t sequence) = 0;
 
+  /// Remove the sequence with the the given component index
+  virtual void removeSequenceWithIndex(uint64_t sequence, int32_t componentID) = 0;
+
   /// Remove all components from the container.
   virtual void removeAll() = 0;
 

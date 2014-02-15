@@ -117,6 +117,12 @@ void ESCoreBase::removeLastComponent(uint64_t entityID, uint64_t compTemplateID)
   cont->removeLastSequence(entityID);
 }
 
+void ESCoreBase::removeComponentAtIndex(uint64_t entityID, int32_t index, uint64_t templateID)
+{
+  BaseComponentContainer* cont = getComponentContainer(templateID);
+  cont->removeSequenceWithIndex(entityID, index);
+}
+
 void ESCoreBase::removeAllComponents(uint64_t entityID, uint64_t compTemplateID)
 {
   BaseComponentContainer* cont = getComponentContainer(compTemplateID);

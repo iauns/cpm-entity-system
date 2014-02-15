@@ -55,6 +55,23 @@ public:
   /// comes from the TemplateID<> class).
   void removeAllComponents(uint64_t entityID, uint64_t compTemplateID);
 
+  template <typename T>
+  void removeAllComponentsT(uint64_t entityID)
+  {
+    removeAllComponents(entityID, TemplateID<T>::getID());
+  }
+
+  /// Removes the component for \p entityID at the given index. Usually
+  /// used with group systems that count the index until a particular
+  /// component.
+  void removeComponentAtIndex(uint64_t entityID, int32_t index, uint64_t templateID);
+
+  template <typename T>
+  void removeComponentAtIndexT(uint64_t entityID, int32_t index)
+  {
+    removeComponentAtIndex(entityID, index, TemplateID<T>::getID());
+  }
+
   /// NOTE: If you use either of the following functions, it is highly advised
   ///       that you renormalize with stableSort = true! This ensures that
   ///       your logic regarding what component comes first / last, when
@@ -66,8 +83,20 @@ public:
   /// from the TemplateID<> class).
   void removeFirstComponent(uint64_t entityID, uint64_t compTemplateID);
 
+  template <typename T>
+  void removeFirstComponentT(uint64_t entityID)
+  {
+    removeFirstComponent(entityID, TemplateID<T>::getID());
+  }
+
   /// Removes the last component with the given \p compTemplateID.
   void removeLastComponent(uint64_t entityID, uint64_t compTemplateID);
+
+  template <typename T>
+  void removeLastComponentT(uint64_t entityID)
+  {
+    removeLastComponent(entityID, TemplateID<T>::getID());
+  }
   /// @}
 
   /// Retrieves the list of static components. You can modify these values at

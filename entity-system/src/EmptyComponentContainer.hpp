@@ -18,6 +18,7 @@ public:
   void removeSequence(uint64_t) override {}
   void removeFirstSequence(uint64_t) override {}
   void removeLastSequence(uint64_t) override {}
+  void removeSequenceWithIndex(uint64_t, int32_t) override {}
   bool isStatic() override {return false;}
   uint64_t getSequenceFromIndex(int) override {return 0;}
 };

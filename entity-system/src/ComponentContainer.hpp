@@ -276,7 +276,7 @@ public:
             ++it;
           }
 
-          // Call components destructor (we need to do this at the end).
+          // Call component's destructor (we need to do this at the end).
           if (priorIt != mComponents.end() && priorIt->sequence == rem.sequence)
           {
             cc_detail::maybe_component_destruct(priorIt->component, rem.sequence, 0);
@@ -284,6 +284,27 @@ public:
             --mLastSortedSize;
           }
         }
+        else if (rem.removeType == REMOVE_INDEX)
+        {
+          int index = 0;
+          while (it != mComponents.end() && it->sequence == rem.sequence)
+          {
+            if (index == rem.removeIndex)
+            {
+              // Call component's destructor (we need to do this at the end).
+              cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+
+              it = mComponents.erase(it);
+              --mLastSortedSize;
+              break;
+            }
+            else
+            {
+              ++it;
+            }
+            ++index;
+          }
+       }
         else // if (rem.removeType == REMOVE_FIRST)
         {
           if (it != mComponents.end() && it->sequence == rem.sequence)
@@ -370,6 +391,11 @@ public:
     mRemovals.emplace_back(sequence, REMOVE_LAST);
   }
 
+  void removeSequenceWithIndex(uint64_t sequence, int32_t componentID) override
+  {
+    mRemovals.emplace_back(sequence, REMOVE_INDEX, componentID);
+  }
+
   void removeAll() override
   {
     for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
@@ -427,18 +453,21 @@ public:
   {
     REMOVE_ALL,
     REMOVE_FIRST,
-    REMOVE_LAST
+    REMOVE_LAST,
+    REMOVE_INDEX
   };
 
   struct RemovalItem
   {
-    RemovalItem(uint64_t sequenceIn, REMOVAL_TYPE removeTypeIn) :
+    RemovalItem(uint64_t sequenceIn, REMOVAL_TYPE removeTypeIn, int32_t index = -1) :
         sequence(sequenceIn),
-        removeType(removeTypeIn)
+        removeType(removeTypeIn),
+        removeIndex(index)
     {}
 
     uint64_t      sequence;
     REMOVAL_TYPE  removeType;
+    int32_t       removeIndex;
   };
 
   struct ModificationItem
