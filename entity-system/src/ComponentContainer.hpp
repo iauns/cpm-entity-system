@@ -460,6 +460,12 @@ public:
   }
 
 protected:
+  /// \todo Separate out additions to mComponents instead of having them
+  ///       added into mComponents. We don't want the address of mComponents
+  ///       to change during the frame if we want to execute tasks
+  ///       asynchronously against the components. In this sense, we could
+  ///       execute systems asynchronously as long as they don't generate
+  ///       unintended mutations of global state.
   std::vector<ComponentItem>    mComponents;    ///< All components currently in the system.
   std::vector<RemovalItem>      mRemovals;      ///< An array of objects to remove during
                                                 ///< renormalization.
