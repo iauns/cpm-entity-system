@@ -9,39 +9,35 @@
 
 namespace CPM_ES_NS {
 
-namespace cc_detail {
-
-// SFINAE implementation of possible function calls inside of component
-// structures.
-template<class T>
-auto maybe_component_construct(T& v, uint64_t sequence, int)
-    -> decltype(v.componentConstruct(sequence), void())
-{
-  v.componentConstruct(sequence);
-}
-
-template<class T>
-void maybe_component_construct(T&, size_t, long){}
-
-
-template<class T>
-auto maybe_component_destruct(T& v, uint64_t sequence, int)
-    -> decltype(v.componentDestruct(sequence), void())
-{
-  v.componentDestruct(sequence);
-}
-
-template<class T>
-void maybe_component_destruct(T&, size_t, long){}
-
-}
-
 /// Component container.
 /// \todo Add maximum size caps to the container. Should also check size
 ///       caps for the number of removed components as well.
 template <typename T>
 class ComponentContainer : public BaseComponentContainer
 {
+  // SFINAE implementation of possible function calls inside of component
+  // structures.
+  template<class V>
+  static auto maybe_component_construct(V& v, uint64_t sequence, int)
+      -> decltype(v.componentConstruct(sequence), void())
+  {
+    v.componentConstruct(sequence);
+  }
+
+  template<class V>
+  static void maybe_component_construct(V&, size_t, long){}
+
+
+  template<class V>
+  static auto maybe_component_destruct(V& v, uint64_t sequence, int)
+      -> decltype(v.componentDestruct(sequence), void())
+  {
+    v.componentDestruct(sequence);
+  }
+
+  template<class V>
+  static void maybe_component_destruct(V&, size_t, long){}
+
 public:
   ComponentContainer() :
       mIsStatic(false),
@@ -220,7 +216,7 @@ public:
         for (; it != mComponents.end(); ++it)
         {
           // Construct added components
-          cc_detail::maybe_component_construct(it->component, it->sequence, 0);
+          maybe_component_construct(it->component, it->sequence, 0);
         }
 
         // Sort the entire vector (not just to mLastSortedSize).
@@ -260,7 +256,7 @@ public:
           while (it != mComponents.end() && it->sequence == rem.sequence)
           {
             // Call components destructor (we need to do this at the end).
-            cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+            maybe_component_destruct(it->component, rem.sequence, 0);
 
             it = mComponents.erase(it);
             --mLastSortedSize;
@@ -279,7 +275,7 @@ public:
           // Call component's destructor (we need to do this at the end).
           if (priorIt != mComponents.end() && priorIt->sequence == rem.sequence)
           {
-            cc_detail::maybe_component_destruct(priorIt->component, rem.sequence, 0);
+            maybe_component_destruct(priorIt->component, rem.sequence, 0);
             priorIt = mComponents.erase(priorIt);
             --mLastSortedSize;
           }
@@ -292,7 +288,7 @@ public:
             if (index == rem.removeIndex)
             {
               // Call component's destructor (we need to do this at the end).
-              cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+              maybe_component_destruct(it->component, rem.sequence, 0);
 
               it = mComponents.erase(it);
               --mLastSortedSize;
@@ -309,7 +305,7 @@ public:
         {
           if (it != mComponents.end() && it->sequence == rem.sequence)
           {
-            cc_detail::maybe_component_destruct(it->component, rem.sequence, 0);
+            maybe_component_destruct(it->component, rem.sequence, 0);
             it = mComponents.erase(it);
             --mLastSortedSize;
           }
@@ -400,7 +396,7 @@ public:
   {
     for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
     {
-      cc_detail::maybe_component_destruct(it->component, it->sequence, 0);
+      maybe_component_destruct(it->component, it->sequence, 0);
     }
 
     mComponents.clear();
