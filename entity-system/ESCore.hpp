@@ -17,11 +17,23 @@ public:
     coreAddComponent(entityID, component);
   }
 
+  template <typename T>
+  void addComponent(uint64_t entityID, T&& component)
+  {
+    coreAddComponent(entityID, std::move(component));
+  }
+
   /// Returns the index of the static component.
   template <typename T>
   size_t addStaticComponent(const T& component)
   {
     return coreAddStaticComponent(component);
+  }
+
+  template <typename T>
+  size_t addStaticComponent(T&& component)
+  {
+    return coreAddStaticComponent(std::move(component));
   }
 };
 
