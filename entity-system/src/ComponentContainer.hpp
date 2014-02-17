@@ -15,29 +15,6 @@ namespace CPM_ES_NS {
 template <typename T>
 class ComponentContainer : public BaseComponentContainer
 {
-  // SFINAE implementation of possible function calls inside of component
-  // structures.
-  template<class V>
-  static auto maybe_component_construct(V& v, uint64_t sequence, int)
-      -> decltype(v.componentConstruct(sequence), void())
-  {
-    v.componentConstruct(sequence);
-  }
-
-  template<class V>
-  static void maybe_component_construct(V&, size_t, long){}
-
-
-  template<class V>
-  static auto maybe_component_destruct(V& v, uint64_t sequence, int)
-      -> decltype(v.componentDestruct(sequence), void())
-  {
-    v.componentDestruct(sequence);
-  }
-
-  template<class V>
-  static void maybe_component_destruct(V&, size_t, long){}
-
 public:
   ComponentContainer() :
       mIsStatic(false),
@@ -211,14 +188,6 @@ public:
     {
       if (mLastSortedSize != mComponents.size())
       {
-        // Iterate through the components to-be-constructed array.
-        auto it = mComponents.begin() + mLastSortedSize;
-        for (; it != mComponents.end(); ++it)
-        {
-          // Construct added components
-          maybe_component_construct(it->component, it->sequence, 0);
-        }
-
         // Sort the entire vector (not just to mLastSortedSize).
         // We *always* stable sort static components. This way we guarantee
         // the correct ordering.
@@ -255,9 +224,6 @@ public:
         {
           while (it != mComponents.end() && it->sequence == rem.sequence)
           {
-            // Call components destructor (we need to do this at the end).
-            maybe_component_destruct(it->component, rem.sequence, 0);
-
             it = mComponents.erase(it);
             --mLastSortedSize;
           }
@@ -275,7 +241,6 @@ public:
           // Call component's destructor (we need to do this at the end).
           if (priorIt != mComponents.end() && priorIt->sequence == rem.sequence)
           {
-            maybe_component_destruct(priorIt->component, rem.sequence, 0);
             priorIt = mComponents.erase(priorIt);
             --mLastSortedSize;
           }
@@ -287,9 +252,6 @@ public:
           {
             if (index == rem.removeIndex)
             {
-              // Call component's destructor (we need to do this at the end).
-              maybe_component_destruct(it->component, rem.sequence, 0);
-
               it = mComponents.erase(it);
               --mLastSortedSize;
               break;
@@ -305,7 +267,6 @@ public:
         {
           if (it != mComponents.end() && it->sequence == rem.sequence)
           {
-            maybe_component_destruct(it->component, rem.sequence, 0);
             it = mComponents.erase(it);
             --mLastSortedSize;
           }
@@ -394,11 +355,6 @@ public:
 
   void removeAll() override
   {
-    for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
-    {
-      maybe_component_destruct(it->component, it->sequence, 0);
-    }
-
     mComponents.clear();
     mRemovals.clear();
     mModifications.clear();
