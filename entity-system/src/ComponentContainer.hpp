@@ -46,10 +46,10 @@ public:
         component(comp)
     {}
 
-    ComponentItem(uint64_t seq, T&& comp) :
-        sequence(seq),
-        component(std::move(comp))
-    {}
+    //ComponentItem(uint64_t seq, T&& comp) :
+    //    sequence(seq),
+    //    component(std::move(comp))
+    //{}
 
     uint64_t  sequence;   ///< Commonly used element in the first cacheline.
     T         component;  ///< Copy constructable component data.
@@ -313,17 +313,17 @@ public:
     mComponents.emplace_back(sequence, component);
   }
 
-  void addComponent(uint64_t sequence, T&& component)
-  {
-    // Add the component to the end of mComponents and wait for a renormalize.
-    if (isStatic() == true)
-    {
-      std::cerr << "Attempting to add entityID component to a static component container!" << std::endl;
-      throw std::runtime_error("Attempting to add entityID component to static component container!");
-      return;
-    }
-    mComponents.emplace_back(sequence, std::move(component));
-  }
+  //void addComponent(uint64_t sequence, T&& component)
+  //{
+  //  // Add the component to the end of mComponents and wait for a renormalize.
+  //  if (isStatic() == true)
+  //  {
+  //    std::cerr << "Attempting to add entityID component to a static component container!" << std::endl;
+  //    throw std::runtime_error("Attempting to add entityID component to static component container!");
+  //    return;
+  //  }
+  //  mComponents.emplace_back(sequence, std::move(component));
+  //}
 
   /// Returns the index the static component was added at.
   size_t addStaticComponent(const T& component)
@@ -347,27 +347,27 @@ public:
     return newIndex;
   }
 
-  /// Returns the index the static component was added at.
-  size_t addStaticComponent(T&& component)
-  {
-    if (isStatic() == false)
-    {
-      if (mComponents.size() > 0)
-      {
-        std::cerr << "Cannot add static components to a container that already has";
-        std::cerr << " non-static\ncomponents!" << std::endl;
-        throw std::runtime_error("Cannot add static components to an entityID component container!");
-        return -1;
-      }
-      else
-      {
-        setStatic(true);
-      }
-    }
-    size_t newIndex = mComponents.size();
-    mComponents.emplace_back(StaticEntID, std::move(component));
-    return newIndex;
-  }
+  ///// Returns the index the static component was added at.
+  //size_t addStaticComponent(T&& component)
+  //{
+  //  if (isStatic() == false)
+  //  {
+  //    if (mComponents.size() > 0)
+  //    {
+  //      std::cerr << "Cannot add static components to a container that already has";
+  //      std::cerr << " non-static\ncomponents!" << std::endl;
+  //      throw std::runtime_error("Cannot add static components to an entityID component container!");
+  //      return -1;
+  //    }
+  //    else
+  //    {
+  //      setStatic(true);
+  //    }
+  //  }
+  //  size_t newIndex = mComponents.size();
+  //  mComponents.emplace_back(StaticEntID, std::move(component));
+  //  return newIndex;
+  //}
 
   void removeSequence(uint64_t sequence) override
   {
@@ -416,10 +416,10 @@ public:
     mModifications.emplace_back(val, index, priority);
   }
 
-  void modifyIndex(T&& val, size_t index, int priority)
-  {
-    mModifications.emplace_back(std::move(val), index, priority);
-  }
+  //void modifyIndex(T&& val, size_t index, int priority)
+  //{
+  //  mModifications.emplace_back(std::move(val), index, priority);
+  //}
 
   /// Retrieves the active size of the vector backing this component container.
   /// Used only for debugging purposes (see addStaticComponent in ESCore).
@@ -473,11 +473,11 @@ public:
         priority(pri)
     {}
 
-    ModificationItem(T&& val, size_t idx, int pri) :
-        value(std::move(val)),
-        componentIndex(idx),
-        priority(pri)
-    {}
+    //ModificationItem(T&& val, size_t idx, int pri) :
+    //    value(std::move(val)),
+    //    componentIndex(idx),
+    //    priority(pri)
+    //{}
 
     T value;
     size_t componentIndex; 

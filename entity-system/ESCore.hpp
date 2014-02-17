@@ -17,11 +17,11 @@ public:
     coreAddComponent(entityID, component);
   }
 
-  template <typename T>
-  void addComponent(uint64_t entityID, T&& component)
-  {
-    coreAddComponent(entityID, std::move(component));
-  }
+  //template <typename T>
+  //void addComponent(uint64_t entityID, T&& component)
+  //{
+  //  coreAddComponent(entityID, std::move(component));
+  //}
 
   /// Returns the index of the static component.
   template <typename T>
@@ -30,11 +30,11 @@ public:
     return coreAddStaticComponent(component);
   }
 
-  template <typename T>
-  size_t addStaticComponent(T&& component)
-  {
-    return coreAddStaticComponent(std::move(component));
-  }
+  //template <typename T>
+  //size_t addStaticComponent(T&& component)
+  //{
+  //  return coreAddStaticComponent(std::move(component));
+  //}
 };
 
 } // namespace CPM_ES_NS

@@ -140,20 +140,20 @@ struct ComponentGroup
     }
   }
 
-  void modify(T&& val, size_t componentNum = 0, int priority = 1) const
-  {
-    // Modify value by storing index, in raw array, to modified component.
-    // This index will be used when re-integrating changes made at the end
-    // of the frame.
-    if (container != nullptr)
-    {
-      container->modifyIndex(std::move(val), containerIndex + componentNum, priority);
-    }
-    else
-    {
-      std::cerr << "Attempted to modify non-existante container!" << std::endl;
-    }
-  }
+  //void modify(T&& val, size_t componentNum = 0, int priority = 1) const
+  //{
+  //  // Modify value by storing index, in raw array, to modified component.
+  //  // This index will be used when re-integrating changes made at the end
+  //  // of the frame.
+  //  if (container != nullptr)
+  //  {
+  //    container->modifyIndex(std::move(val), containerIndex + componentNum, priority);
+  //  }
+  //  else
+  //  {
+  //    std::cerr << "Attempted to modify non-existante container!" << std::endl;
+  //  }
+  //}
 
   std::size_t numComponents;
   typename ComponentContainer<T>::ComponentItem* components;
