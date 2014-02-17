@@ -35,7 +35,7 @@ namespace CPM_ES_NS {
 
 EmptyComponentContainer ESCoreBase::mEmptyContainer;
 
-bool ESCoreBase::hasComponentContainer(uint64_t componentID)
+bool ESCoreBase::hasComponentContainer(uint64_t componentID) const
 {
   auto it = mComponents.find(componentID);
   if (it == mComponents.end())

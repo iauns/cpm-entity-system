@@ -26,7 +26,7 @@ public:
   virtual ~ESCoreBase() {deleteAllComponentContainers();}
 
   /// Returns false if the component doesn't exist.
-  bool hasComponentContainer(uint64_t componentID);
+  bool hasComponentContainer(uint64_t componentID) const;
 
   /// When called, ESCoreBase takes ownership of \p component.
   /// Adds a new component to the system. If a component of the same
@@ -170,6 +170,22 @@ protected:
     concreteContainer->addComponent(entityID, component);
   }
 
+  /// Same function as above, but we bind to an rvalue reference.
+  template <typename T, class CompCont = ComponentContainer<T>>
+  void coreAddComponent(uint64_t entityID, T&& component)
+  {
+    if (entityID == 0)
+    {
+      std::cerr << "cpm-entity-system: Attempting to add a component of entityID 0! Not allowed." << std::endl;
+      throw std::runtime_error("Attempting to add a component of entityID 0.");
+      return;
+    }
+
+    BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
+    CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
+    concreteContainer->addComponent(entityID, std::move(component));
+  }
+
   /// Adds a static component. Static components work exactly like normal
   /// components, except that they are not associated with an entityID and are
   /// fed into each system in the same manner. Use this to make 'global'
@@ -186,6 +202,16 @@ protected:
     return concreteContainer->addStaticComponent(component);
   }
 
+  /// Same function as above, but we bind to an rvalue reference.
+  template <typename T, class CompCont = ComponentContainer<T>>
+  size_t coreAddStaticComponent(T&& component)
+  {
+    // If the container isn't already marked as static, mark it and ensure
+    // that it is empty.
+    BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
+    CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
+    return concreteContainer->addStaticComponent(std::move(component));
+  }
 
   template <typename T, class CompCont>
   BaseComponentContainer* ensureComponentArrayExists()
