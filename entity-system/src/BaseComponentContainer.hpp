@@ -1,6 +1,8 @@
 #ifndef IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 #define IAUNS_ENTITY_SYSTEM_BASECOMPONENTCONTAINER_HPP
 
+#include <cstdint>
+
 namespace CPM_ES_NS {
 
 // Component base class, used to verify component types at run-time.
@@ -49,7 +51,7 @@ public:
   /// If the index is not present, the function returns 0 (an invalid sequence).
   virtual uint64_t getSequenceFromIndex(int index) const = 0;
 
-  static const int StaticEntID = 1;
+  static const int StaticEntID;
 };
 
 } // namespace CPM_ES_NS 
