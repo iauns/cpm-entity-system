@@ -58,7 +58,7 @@ public:
   }
 
   /// Returns -1 if no component of the given sequence is found.
-  int getComponentItemIndexWithSequence(uint64_t sequence)
+  int getComponentItemIndexWithSequence(uint64_t sequence) const
   {
     if (mComponents.size() == 0)
       return -1;
@@ -68,17 +68,17 @@ public:
     if (isStatic())
       return 0;
 
-    auto last = mComponents.begin() + mLastSortedSize;
+    auto last = mComponents.cbegin() + mLastSortedSize;
 
     ComponentItem item;
     item.sequence = sequence;
 
-    auto it = std::lower_bound(mComponents.begin(), last, item,
+    auto it = std::lower_bound(mComponents.cbegin(), last, item,
                                componentCompare);
 
     if (it->sequence == sequence)
     {
-      return it - mComponents.begin();
+      return it - mComponents.cbegin();
     }
     else
     {
@@ -277,16 +277,16 @@ public:
   }
 
   /// Get the least sequence held by the component.
-  uint64_t getLowerSequence() override { return mLowerSequence; }
+  uint64_t getLowerSequence() const override { return mLowerSequence; }
 
   /// Get the upper sequence held by the component.
-  uint64_t getUpperSequence() override { return mUpperSequence; }
+  uint64_t getUpperSequence() const override { return mUpperSequence; }
 
   /// Retrieves the number of sorted components.
-  uint64_t getNumComponents() override { return mLastSortedSize; }
+  uint64_t getNumComponents() const override { return mLastSortedSize; }
 
   /// Retrieves the sequence associated with a particular index.
-  uint64_t getSequenceFromIndex(int index) override
+  uint64_t getSequenceFromIndex(int index) const override
   {
     if (index < 0 || index >= mLastSortedSize)
       return 0;
@@ -382,8 +382,8 @@ public:
   /// Used only for debugging purposes (see addStaticComponent in ESCore).
   size_t getSizeOfBackingContainer()  {return mComponents.size();}
 
-  bool isStatic() override    {return mIsStatic;}
-  void setStatic(bool truth)  {mIsStatic = truth;}
+  bool isStatic() const override    {return mIsStatic;}
+  void setStatic(bool truth)        {mIsStatic = truth;}
 
   int mLastSortedSize;                ///< Unsorted elements can be added to the end
                                       ///< of mComponents. This represents the last

@@ -13,13 +13,13 @@ public:
   virtual void renormalize(bool stableSort) = 0;
 
   /// Get the least sequence held by the component.
-  virtual uint64_t getLowerSequence() = 0;
+  virtual uint64_t getLowerSequence() const = 0;
 
   /// Get the upper sequence held by the component.
-  virtual uint64_t getUpperSequence() = 0;
+  virtual uint64_t getUpperSequence() const = 0;
 
   /// Get number of components.
-  virtual uint64_t getNumComponents() = 0;
+  virtual uint64_t getNumComponents() const = 0;
 
   /// Remove components identified with \p sequence. Every component associated
   /// with the sequnece (if there are multiple) will be removed.
@@ -40,14 +40,14 @@ public:
   /// Returns true if the component system contains only static elements.
   /// These elements values are always the same regardless of the entity
   /// executing. Use for global values.
-  virtual bool isStatic() = 0;
+  virtual bool isStatic() const = 0;
 
   /// Retrieves the sequence associated with the given index.
   /// Index must be in [0, getNumComponents()).
   /// Be careful when using this function, cache misses are likely if you
   /// aren't walking in-order.
   /// If the index is not present, the function returns 0 (an invalid sequence).
-  virtual uint64_t getSequenceFromIndex(int index) = 0;
+  virtual uint64_t getSequenceFromIndex(int index) const = 0;
 
   static const int StaticEntID = 1;
 };
