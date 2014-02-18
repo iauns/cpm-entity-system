@@ -56,5 +56,6 @@ file (GLOB Sources
 
 # Build the library.
 add_library(${CPM_LIB_TARGET_NAME} ${Sources})
-
-
+if (NOT EMSCRIPTEN AND CPM_LIBRARIES)
+  target_link_libraries(${CPM_LIB_TARGET_NAME} ${CPM_LIBRARIES})
+endif()
