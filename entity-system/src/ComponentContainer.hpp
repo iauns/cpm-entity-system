@@ -153,6 +153,40 @@ public:
       return item;
   }
 
+  /// Retrieves the component for the given sequence. Returns both a pointer
+  /// to the component and its index in the component container. You can
+  /// use this index to modify the components value using modifyIndex.
+  std::pair<const T*, size_t> getComponent(uint64_t sequence) const
+  {
+    if (mComponents.size() == 0)
+      return std::make_pair(nullptr, 0);
+
+    if (isStatic())
+      return std::make_pair(&mComponents.front().component, 0);
+
+    auto last = mComponents.cbegin() + mLastSortedSize;
+
+    // Unfortunately, we have to do this in order to take advantage of
+    // STL algorithms (duplicate the exact component).
+    ComponentItem item;
+    item.sequence = sequence;
+
+    // lower_bound uses a binary search to find the target component.
+    // Our vector is always sorted, so we can pull this off.
+    auto it = std::lower_bound(mComponents.cbegin(), last, item,
+                               componentCompare);
+
+    if (it->sequence == sequence)
+    {
+      size_t index = it - mComponents.cbegin();
+      return std::make_pair(&it->component, index);
+    }
+    else
+    {
+      return std::make_pair(nullptr, 0);
+    }
+  }
+
   /// Sorts in added components and removes deleted components.
   /// Neither of these operations (addition or deletion) take affect when the
   /// system is operating. This way, each timestep is completely deterministic.
