@@ -14,6 +14,7 @@ public:
   uint64_t getLowerSequence() const override {return 0;}
   uint64_t getUpperSequence() const override {return 0;}
   uint64_t getNumComponents() const override {return 0;}
+  int getNumComponentsWithSequence(uint64_t) const override {return 0;}
   void removeAll() override {}
   void removeSequence(uint64_t) override {}
   void removeFirstSequence(uint64_t) override {}

@@ -44,15 +44,20 @@ public:
   /// Abstract functions.
   virtual void execute(ESCoreBase& core) = 0;
 
-  void walkComponents(ESCoreBase& core)
+  void walkComponents(ESCoreBase& core) override
   {
     execute(core);
   }
 
-  bool walkEntity(ESCoreBase& core, uint64_t entityID)
+  bool walkEntity(ESCoreBase& core, uint64_t entityID) override
   {
     execute(core);
     return true;
+  }
+
+  std::vector<uint64_t> getComponents() const override
+  {
+    return std::vector<uint64_t>();
   }
 };
 

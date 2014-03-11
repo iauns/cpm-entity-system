@@ -51,6 +51,12 @@ public:
   /// If the index is not present, the function returns 0 (an invalid sequence).
   virtual uint64_t getSequenceFromIndex(int index) const = 0;
 
+  /// Retrieves the number of components associated with a particular sequence.
+  /// This function also counts the components *to be added*! Seeing the
+  /// components to be added is important when we want debugging information
+  /// related to if we have satisfied a particular system.
+  virtual int getNumComponentsWithSequence(uint64_t sequence) const = 0;
+
   static const int StaticEntID;
 };
 

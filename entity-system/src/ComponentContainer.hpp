@@ -187,6 +187,47 @@ public:
     }
   }
 
+  int getNumComponentsWithSequence(uint64_t sequence) const override
+  {
+    int numComponents = 0;
+    // We can't just use getComponentItemWithSequence because we want to
+    // also search added items.
+
+    if (mComponents.size() == 0) { return 0; }
+    if (isStatic()) { return 0; }
+
+    // Unfortunately, we have to do this in order to take advantage of
+    // STL algorithms (duplicate the exact component).
+    ComponentItem testItem;
+    testItem.sequence = sequence;
+
+    // lower_bound uses a binary search to find the target component.
+    // Our vector is always sorted, so we can pull this off.
+    auto it = std::lower_bound(mComponents.cbegin(), mComponents.cend(), testItem,
+                               componentCompare);
+
+    if (it->sequence != sequence) { return 0; }
+
+    const ComponentItem* item = &(*it);
+
+    /// \xxx NOTE: When we separated the 'added' array from the primary array
+    ///      we want to also search the added array here! This is in the
+    ///      contract for the function (see BaseComponentContainer).
+
+    // We are guaranteed that there is at least one component in the mComponents
+    // array because nullptr was not returned from the
+    // getComponentItemWithSequence function.
+    int curIndex = item - &mComponents[0];
+    while (item->sequence == sequence && curIndex < mComponents.size())
+    {
+      ++numComponents;
+      ++curIndex;
+      ++item;
+    }
+
+    return numComponents;
+  }
+
   /// Sorts in added components and removes deleted components.
   /// Neither of these operations (addition or deletion) take affect when the
   /// system is operating. This way, each timestep is completely deterministic.

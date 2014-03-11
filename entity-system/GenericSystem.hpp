@@ -442,7 +442,7 @@ public:
     }
   }
 
-  std::vector<uint64_t> getComponents()
+  std::vector<uint64_t> getComponents() const override
   {
     std::vector<uint64_t> components = { TemplateID<Ts>::getID()... };
     return components;
