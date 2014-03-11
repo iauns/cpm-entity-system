@@ -59,6 +59,11 @@ public:
   {
     return std::vector<uint64_t>();
   }
+
+  virtual bool isComponentOptional(uint64_t /* component */) override
+  {
+    return false;
+  }
 };
 
 } // namespace CPM_ES_NS
