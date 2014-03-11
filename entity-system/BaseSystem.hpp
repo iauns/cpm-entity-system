@@ -20,6 +20,7 @@ public:
   // Debug functions related to printing components that a particular
   // entity is missing in relation to the system executing.
   virtual std::vector<uint64_t> getComponents() const = 0;
+  virtual bool isComponentOptional(uint64_t component) = 0;
 };
 
 } // namespace CPM_ES_NS
