@@ -379,7 +379,7 @@ public:
             }
             ++index;
           }
-       }
+        }
         else // if (rem.removeType == REMOVE_FIRST)
         {
           if (it != mComponents.end() && it->sequence == rem.sequence)

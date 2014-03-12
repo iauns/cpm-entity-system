@@ -198,19 +198,19 @@ TEST(EntitySystem, MultiOptionalOnlyStaticTest)
     ++count;
   }
 
-  uint64_t id = core->getNewEntityID();
+  uint64_t id = core->getNewEntityID() - 1;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);

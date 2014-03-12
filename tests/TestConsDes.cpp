@@ -74,7 +74,7 @@ struct CompHomPos
 };
 
 int CompHomPos::constructor = 0;
-uint64_t CompHomPos::lastID = 0;
+uint64_t CompHomPos::lastID = CPM_ES_NS::BaseComponentContainer::StaticEntID;
 
 struct CompGameplay
 {
@@ -113,6 +113,8 @@ std::vector<CompPosition> posComponents = {
   glm::vec3(1.5, 3.0, 107),
   glm::vec3(4.0, 7.0, 9.0),
   glm::vec3(2.92, 89.0, 4.0),
+  glm::vec3(0.0, 0.0, 0.0),
+  glm::vec3(1.0, 2.0, 3.0),
 };
 
 std::vector<CompHomPos> homPosComponents = {
@@ -122,6 +124,8 @@ std::vector<CompHomPos> homPosComponents = {
   glm::vec4(3.0, 13.0, 43.0, 53.0),
   glm::vec4(4.0, 14.0, 44.0, 54.0),
   glm::vec4(5.0, 15.0, 45.0, 55.0),
+  glm::vec4(0.0, 0.0, 0.0, 0.0),
+  glm::vec4(1.0, 11.0, 41.0, 51.0),
 };
 
 std::vector<CompGameplay> gameplayComponents = {
@@ -131,6 +135,8 @@ std::vector<CompGameplay> gameplayComponents = {
   CompGameplay(99, 892),
   CompGameplay(73, 64),
   CompGameplay(23, 92),
+  CompGameplay(0, 0),
+  CompGameplay(45, 21),
 };
 
 // This basic system will apply, every frame, to entities with the CompPosition,

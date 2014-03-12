@@ -130,23 +130,23 @@ TEST(EntitySystem, TestDuplicateComponents)
   // Generate entity system core.
   std::shared_ptr<es::ESCore> core(new es::ESCore());
 
-  uint64_t id = core->getNewEntityID(); // 1
+  uint64_t id = core->getNewEntityID() - 1; // 1
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID(); // 2
+  id = core->getNewEntityID() - 1; // 2
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
   BasicSystem::invalidComponents.insert(std::make_pair(id, true));
 
-  id = core->getNewEntityID(); // 3
+  id = core->getNewEntityID() - 1; // 3
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
   core->addComponent(id, gameplayComponents[id + 1]);
 
-  id = core->getNewEntityID() + 1; // 5
+  id = core->getNewEntityID(); // 5
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);

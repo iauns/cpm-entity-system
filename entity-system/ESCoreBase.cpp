@@ -4,6 +4,14 @@ namespace CPM_ES_NS {
 
 EmptyComponentContainer ESCoreBase::mEmptyContainer;
 
+// Note: It is *very* important that mCurSequence starts one greater than
+// the StaticEntityID! Otherwise we could accidentally delete static components!
+ESCoreBase::ESCoreBase()
+ : mCurSequence(BaseComponentContainer::StaticEntID)
+{
+
+}
+
 bool ESCoreBase::hasComponentContainer(uint64_t componentID) const
 {
   auto it = mComponents.find(componentID);

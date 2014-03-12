@@ -168,18 +168,18 @@ TEST(EntitySystem, OptionalAllWalkCornerCase)
   // Generate entity system core.
   std::shared_ptr<es::ESCore> core(new es::ESCore());
 
-  uint64_t id = core->getNewEntityID(); // id = 1
+  uint64_t id = core->getNewEntityID() - 1; // id = 1
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
 
-  id = core->getNewEntityID();
+  id = core->getNewEntityID() - 1;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   

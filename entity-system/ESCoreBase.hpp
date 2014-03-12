@@ -22,7 +22,7 @@ namespace CPM_ES_NS {
 class ESCoreBase
 {
 public:
-  ESCoreBase() : mCurSequence(0) {}
+  ESCoreBase();
   virtual ~ESCoreBase() {deleteAllComponentContainers();}
 
   /// Returns false if the component doesn't exist.

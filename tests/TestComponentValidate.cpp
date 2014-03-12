@@ -123,9 +123,8 @@ TEST(EntitySystem, TestComponentValidate)
   // Generate entity system core.
   std::shared_ptr<es::ESCore> core(new es::ESCore());
 
-
-
   uint64_t id = core->getNewEntityID();
+  uint64_t startID = id;
   core->addComponent(id, posComponents[id]);
   core->addComponent(id, homPosComponents[id]);
   core->addComponent(id, gameplayComponents[id]);
@@ -156,20 +155,20 @@ TEST(EntitySystem, TestComponentValidate)
   es::BaseComponentContainer* ccHPos = core->getComponentContainer(es::TemplateID<CompHomPos>::getID());
   es::BaseComponentContainer* ccGP   = core->getComponentContainer(es::TemplateID<CompGameplay>::getID());
 
-  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(1));
-  EXPECT_EQ(0, ccPos->getNumComponentsWithSequence(2));
-  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(3));
-  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(4));
+  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(startID + 0));
+  EXPECT_EQ(0, ccPos->getNumComponentsWithSequence(startID + 1));
+  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(startID + 2));
+  EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(startID + 3));
 
-  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(1));
-  EXPECT_EQ(2, ccHPos->getNumComponentsWithSequence(2));
-  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(3));
-  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(4));
+  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(startID + 0));
+  EXPECT_EQ(2, ccHPos->getNumComponentsWithSequence(startID + 1));
+  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(startID + 2));
+  EXPECT_EQ(1, ccHPos->getNumComponentsWithSequence(startID + 3));
 
-  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(1));
-  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(2));
-  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(3));
-  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(4));
+  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(startID + 0));
+  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(startID + 1));
+  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(startID + 2));
+  EXPECT_EQ(1, ccGP->getNumComponentsWithSequence(startID + 3));
 
   core->renormalize();
   sys->walkComponents(*core);
