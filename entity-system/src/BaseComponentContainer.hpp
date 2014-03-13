@@ -39,6 +39,11 @@ public:
   /// Remove all components from the container.
   virtual void removeAll() = 0;
 
+  /// Remove all components from the container -- IMMEDIATELY. Use with extreme
+  /// care. This breaks the expected mutable / immutable behavior derived
+  /// from the renormalization mechanism.
+  virtual void removeAllImmediately() = 0;
+
   /// Returns true if the component system contains only static elements.
   /// These elements values are always the same regardless of the entity
   /// executing. Use for global values.

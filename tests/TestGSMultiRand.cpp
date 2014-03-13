@@ -293,7 +293,7 @@ TEST(EntitySystem, MultiRand)
 
   for (int i = 0; i < numIterations; ++i)
   {
-    core->clearAllComponentContainers();
+    core->clearAllComponentContainersImmediately();
 
     ComponentItem<CompPosition>* c_pos      = ComponentItem<CompPosition>::instance();
     ComponentItem<CompHomPos>* c_homPos     = ComponentItem<CompHomPos>::instance();

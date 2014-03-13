@@ -54,7 +54,7 @@ public:
   {
     // Remove all componnts, and if their destructors exist, call those
     // as well.
-    removeAll();
+    removeAllImmediately();
   }
 
   /// Item that represents one component paired with a sequence.
@@ -507,6 +507,22 @@ public:
   }
 
   void removeAll() override
+  {
+    // Iterate through all active components and mark every one for removal.
+    uint64_t lastComponent = 0; // No component will ever be 0, including static components
+                                // (and because of static components...).
+    auto last = mComponents.begin() + mLastSortedSize;
+    for (auto it = mComponents.begin(); it != last; ++it)
+    {
+      if (lastComponent != it->sequence)
+      {
+        removeSequence(it->sequence);
+      }
+      lastComponent = it->sequence;
+    }
+  }
+
+  void removeAllImmediately() override
   {
     for (auto it = mComponents.begin(); it != mComponents.begin() + mLastSortedSize; ++it)
     {

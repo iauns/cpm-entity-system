@@ -16,6 +16,7 @@ public:
   uint64_t getNumComponents() const override {return 0;}
   int getNumComponentsWithSequence(uint64_t) const override {return 0;}
   void removeAll() override {}
+  void removeAllImmediately() override {}
   void removeSequence(uint64_t) override {}
   void removeFirstSequence(uint64_t) override {}
   void removeLastSequence(uint64_t) override {}

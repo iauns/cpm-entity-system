@@ -56,6 +56,12 @@ void ESCoreBase::clearAllComponentContainers()
     iter->second->removeAll();
 }
 
+void ESCoreBase::clearAllComponentContainersImmediately()
+{
+  for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+    iter->second->removeAllImmediately();
+}
+
 void ESCoreBase::deleteAllComponentContainers()
 {
   for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)

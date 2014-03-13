@@ -123,7 +123,7 @@ TEST(EntitySystem, Rand)
 
   for (int i = 0; i < numIterations; ++i)
   {
-    core->clearAllComponentContainers();
+    core->clearAllComponentContainersImmediately();
 
     BasicSystem::invalidComponents.clear();
     BasicSystem::calledEntities.clear();

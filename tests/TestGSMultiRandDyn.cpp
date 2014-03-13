@@ -337,7 +337,7 @@ TEST(EntitySystem, MultiRandDyn)
   const int numIterations = 60;
   int numComponentsTotal = 600;
 
-  core->clearAllComponentContainers();
+  core->clearAllComponentContainersImmediately();
 
   ComponentItem<CompPosition>* c_pos      = ComponentItem<CompPosition>::instance();
   ComponentItem<CompHomPos>* c_homPos     = ComponentItem<CompHomPos>::instance();

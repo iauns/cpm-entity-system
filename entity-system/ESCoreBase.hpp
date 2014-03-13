@@ -40,6 +40,9 @@ public:
   /// Clears out all component containers (deletes all entities).
   void clearAllComponentContainers();
 
+  /// Clears out all component containers *immediately*.
+  void clearAllComponentContainersImmediately();
+
   /// Call this function at the beginning or end of every frame. It renormalizes
   /// all your components (adds / removes components). To call a system, execute
   /// the walkComponents function on BaseSystem. Most systems don't need a

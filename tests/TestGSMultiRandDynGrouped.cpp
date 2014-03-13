@@ -643,7 +643,7 @@ TEST(EntitySystem, MultiRandDynGrouped)
   const int numIterations = 60;
   uint64_t numComponentsTotal = 500;
 
-  core->clearAllComponentContainers();
+  core->clearAllComponentContainersImmediately();
 
   ComponentItem<CompPosition>* c_pos      = ComponentItem<CompPosition>::instance();
   ComponentItem<CompHomPos>* c_homPos     = ComponentItem<CompHomPos>::instance();
