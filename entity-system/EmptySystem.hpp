@@ -59,6 +59,10 @@ public:
     return true;
   }
 
+  // Used in the two functions above.
+  virtual void preWalkComponents(ESCoreBase& core)            {}
+  virtual void postWalkComponents(ESCoreBase& core)           {}
+
   std::vector<uint64_t> getComponents() const override
   {
     return std::vector<uint64_t>();
