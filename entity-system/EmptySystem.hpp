@@ -46,12 +46,16 @@ public:
 
   void walkComponents(ESCoreBase& core) override
   {
+    preWalkComponents(core);
     execute(core);
+    postWalkComponents(core);
   }
 
   bool walkEntity(ESCoreBase& core, uint64_t entityID) override
   {
+    preWalkComponents(core);
     execute(core);
+    postWalkComponents(core);
     return true;
   }
 
