@@ -194,7 +194,6 @@ public:
     // also search added items.
 
     if (mComponents.size() == 0) { return 0; }
-    if (isStatic()) { return 0; }
 
     // Unfortunately, we have to do this in order to take advantage of
     // STL algorithms (duplicate the exact component).
