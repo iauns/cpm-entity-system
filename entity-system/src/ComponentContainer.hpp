@@ -69,6 +69,17 @@ public:
         component(comp)
     {}
 
+
+    bool operator<(const ComponentItem& other) const
+    {
+      return (sequence < other.sequence);
+    }
+
+    bool operator<(uint64_t sequenceIn) const
+    {
+      return sequence < sequenceIn;
+    }
+
     //ComponentItem(uint64_t seq, T&& comp) :
     //    sequence(seq),
     //    component(std::move(comp))
@@ -77,12 +88,6 @@ public:
     uint64_t  sequence;   ///< Commonly used element in the first cacheline.
     T         component;  ///< Copy constructable component data.
   };
-
-
-  static bool componentCompare(const ComponentItem& a, const ComponentItem& b)
-  {
-    return a.sequence < b.sequence;
-  }
 
   /// Returns -1 if no component of the given sequence is found.
   int getComponentItemIndexWithSequence(uint64_t sequence) const
@@ -96,12 +101,7 @@ public:
       return 0;
 
     auto last = mComponents.cbegin() + mLastSortedSize;
-
-    ComponentItem item;
-    item.sequence = sequence;
-
-    auto it = std::lower_bound(mComponents.cbegin(), last, item,
-                               componentCompare);
+    auto it = std::lower_bound(mComponents.cbegin(), last, sequence);
 
     if (it->sequence == sequence)
     {
@@ -123,15 +123,9 @@ public:
 
     auto last = mComponents.begin() + mLastSortedSize;
 
-    // Unfortunately, we have to do this in order to take advantage of
-    // STL algorithms (duplicate the exact component).
-    ComponentItem item;
-    item.sequence = sequence;
-
     // lower_bound uses a binary search to find the target component.
     // Our vector is always sorted, so we can pull this off.
-    auto it = std::lower_bound(mComponents.begin(), last, item,
-                               componentCompare);
+    auto it = std::lower_bound(mComponents.begin(), last, sequence);
 
     if (it->sequence == sequence)
     {
@@ -166,15 +160,9 @@ public:
 
     auto last = mComponents.cbegin() + mLastSortedSize;
 
-    // Unfortunately, we have to do this in order to take advantage of
-    // STL algorithms (duplicate the exact component).
-    ComponentItem item;
-    item.sequence = sequence;
-
     // lower_bound uses a binary search to find the target component.
     // Our vector is always sorted, so we can pull this off.
-    auto it = std::lower_bound(mComponents.cbegin(), last, item,
-                               componentCompare);
+    auto it = std::lower_bound(mComponents.cbegin(), last, sequence);
 
     if (it->sequence == sequence)
     {
@@ -195,15 +183,9 @@ public:
 
     if (mComponents.size() == 0) { return 0; }
 
-    // Unfortunately, we have to do this in order to take advantage of
-    // STL algorithms (duplicate the exact component).
-    ComponentItem testItem;
-    testItem.sequence = sequence;
-
     // lower_bound uses a binary search to find the target component.
     // Our vector is always sorted, so we can pull this off.
-    auto it = std::lower_bound(mComponents.cbegin(), mComponents.cend(), testItem,
-                               componentCompare);
+    auto it = std::lower_bound(mComponents.cbegin(), mComponents.cend(), sequence);
 
     if (it->sequence != sequence) { return 0; }
 
@@ -301,9 +283,9 @@ public:
         // We *always* stable sort static components. This way we guarantee
         // the correct ordering.
         if (!stableSort && !isStatic())
-          std::sort(mComponents.begin(), mComponents.end(), componentCompare);
+          std::sort(mComponents.begin(), mComponents.end());
         else
-          std::stable_sort(mComponents.begin(), mComponents.end(), componentCompare);
+          std::stable_sort(mComponents.begin(), mComponents.end());
 
         mLastSortedSize = mComponents.size();
       }
@@ -321,13 +303,10 @@ public:
     // Perform requested removals.
     if (mRemovals.size() > 0)
     {
-      ComponentItem item;
       for (RemovalItem& rem : mRemovals)
       {
         auto last = mComponents.begin() + mLastSortedSize;
-        item.sequence = rem.sequence;
-        auto it = std::lower_bound(mComponents.begin(), last, item,
-                                   componentCompare);
+        auto it = std::lower_bound(mComponents.begin(), last, rem.sequence);
 
         if (rem.removeType == REMOVE_ALL)
         {
