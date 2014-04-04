@@ -202,16 +202,6 @@ protected:
   /// Static components and regular components cannot be mixed.
   /// Returns the index of the static component.
 
-  // template <typename T, class CompCont = ComponentContainer<T>>
-  // size_t coreAddStaticComponent(const T& component)
-  // {
-  //   // If the container isn't already marked as static, mark it and ensure
-  //   // that it is empty.
-  //   BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
-  //   CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
-  //   return concreteContainer->addStaticComponent(component);
-  // }
-
   // See: http://thbecker.net/articles/rvalue_references/section_08.html
   // Reference collapsing rules:
   // A& & becomes A&
@@ -219,16 +209,9 @@ protected:
   // A&& & becomes A&
   // A&& && becomes A&&
 
-  template <typename T, class CompCont = ComponentContainer<typename std::decay<T>::type>>
-  size_t coreAddStaticComponent(const T& component)
-  {
-   // If the container isn't already marked as static, mark it and ensure
-   // that it is empty.
-   BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
-   CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
-   return concreteContainer->addStaticComponent(component);
-  }
-
+  // Note: This std::decay is the reason why we don't get perfect forwarding
+  // into the ComponentContainer<T> class. We remove its cv qualifiers so
+  // we don't get a type match.
   template <typename T, class CompCont = ComponentContainer<typename std::decay<T>::type>>
   size_t coreAddStaticComponent(T&& component)
   {
