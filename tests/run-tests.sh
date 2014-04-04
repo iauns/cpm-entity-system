@@ -14,6 +14,7 @@ pushd ./bin > /dev/null
     cmake -DCMAKE_BUILD_TYPE=Release ..
   fi
   make -j4
+  #make -j1
   ./entity_system_tests
 popd
 

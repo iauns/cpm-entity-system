@@ -69,6 +69,10 @@ public:
         component(comp)
     {}
 
+    ComponentItem(uint64_t seq, T&& comp) :
+        sequence(seq),
+        component(std::forward(comp))
+    {}
 
     bool operator<(const ComponentItem& other) const
     {
@@ -79,11 +83,6 @@ public:
     {
       return sequence < sequenceIn;
     }
-
-    //ComponentItem(uint64_t seq, T&& comp) :
-    //    sequence(seq),
-    //    component(std::move(comp))
-    //{}
 
     uint64_t  sequence;   ///< Commonly used element in the first cacheline.
     T         component;  ///< Copy constructable component data.
@@ -415,52 +414,74 @@ public:
   //    throw std::runtime_error("Attempting to add entityID component to static component container!");
   //    return;
   //  }
-  //  mComponents.emplace_back(sequence, std::move(component));
+  //  mComponents.emplace_back(sequence, std::forward(component));
   //}
+
+  // /// Returns the index the static component was added at.
+  // size_t addStaticComponent(const T& component)
+  // {
+  //   if (isStatic() == false)
+  //   {
+  //     if (mComponents.size() > 0)
+  //     {
+  //       std::cerr << "Cannot add static components to a container that already has";
+  //       std::cerr << " non-static\ncomponents!" << std::endl;
+  //       throw std::runtime_error("Cannot add static components to an entityID component container!");
+  //       return -1;
+  //     }
+  //     else
+  //     {
+  //       setStatic(true);
+  //     }
+  //   }
+  //   size_t newIndex = mComponents.size();
+  //   mComponents.emplace_back(StaticEntID, component);
+  //   return newIndex;
+  // }
 
   /// Returns the index the static component was added at.
   size_t addStaticComponent(const T& component)
   {
-    if (isStatic() == false)
-    {
-      if (mComponents.size() > 0)
-      {
-        std::cerr << "Cannot add static components to a container that already has";
-        std::cerr << " non-static\ncomponents!" << std::endl;
-        throw std::runtime_error("Cannot add static components to an entityID component container!");
-        return -1;
-      }
-      else
-      {
-        setStatic(true);
-      }
-    }
-    size_t newIndex = mComponents.size();
-    mComponents.emplace_back(StaticEntID, component);
-    return newIndex;
+   if (isStatic() == false)
+   {
+     if (mComponents.size() > 0)
+     {
+       std::cerr << "Cannot add static components to a container that already has";
+       std::cerr << " non-static\ncomponents!" << std::endl;
+       throw std::runtime_error("Cannot add static components to an entityID component container!");
+       return -1;
+     }
+     else
+     {
+       setStatic(true);
+     }
+   }
+   size_t newIndex = mComponents.size();
+   mComponents.emplace_back(StaticEntID, component);
+   return newIndex;
   }
 
-  ///// Returns the index the static component was added at.
-  //size_t addStaticComponent(T&& component)
-  //{
-  //  if (isStatic() == false)
-  //  {
-  //    if (mComponents.size() > 0)
-  //    {
-  //      std::cerr << "Cannot add static components to a container that already has";
-  //      std::cerr << " non-static\ncomponents!" << std::endl;
-  //      throw std::runtime_error("Cannot add static components to an entityID component container!");
-  //      return -1;
-  //    }
-  //    else
-  //    {
-  //      setStatic(true);
-  //    }
-  //  }
-  //  size_t newIndex = mComponents.size();
-  //  mComponents.emplace_back(StaticEntID, std::move(component));
-  //  return newIndex;
-  //}
+  /// Returns the index the static component was added at.
+  size_t addStaticComponent(T&& component)
+  {
+   if (isStatic() == false)
+   {
+     if (mComponents.size() > 0)
+     {
+       std::cerr << "Cannot add static components to a container that already has";
+       std::cerr << " non-static\ncomponents!" << std::endl;
+       throw std::runtime_error("Cannot add static components to an entityID component container!");
+       return -1;
+     }
+     else
+     {
+       setStatic(true);
+     }
+   }
+   size_t newIndex = mComponents.size();
+   mComponents.emplace_back(StaticEntID, std::forward(component));
+   return newIndex;
+  }
 
   void removeSequence(uint64_t sequence) override
   {

@@ -11,6 +11,12 @@
 
 namespace CPM_ES_NS {
 
+template <typename T>
+uint64_t getESTypeID()
+{
+  return TemplateID<typename std::decay<T>::type>::getID();
+}
+
 /// An example of creating a component container map using a std::map.
 /// Feel free to use this class instead of rolling your own.
 /// NOTE: This class is not meant to be used by itself! You should either use
@@ -61,7 +67,7 @@ public:
   template <typename T>
   void removeAllComponentsT(uint64_t entityID)
   {
-    removeAllComponents(entityID, TemplateID<T>::getID());
+    removeAllComponents(entityID, getESTypeID<T>());
   }
 
   /// Removes the component for \p entityID at the given index. Usually
@@ -72,7 +78,7 @@ public:
   template <typename T>
   void removeComponentAtIndexT(uint64_t entityID, int32_t index)
   {
-    removeComponentAtIndex(entityID, index, TemplateID<T>::getID());
+    removeComponentAtIndex(entityID, index, getESTypeID<T>());
   }
 
   /// NOTE: If you use either of the following functions, it is highly advised
@@ -89,7 +95,7 @@ public:
   template <typename T>
   void removeFirstComponentT(uint64_t entityID)
   {
-    removeFirstComponent(entityID, TemplateID<T>::getID());
+    removeFirstComponent(entityID, getESTypeID<T>());
   }
 
   /// Removes the last component with the given \p compTemplateID.
@@ -98,7 +104,7 @@ public:
   template <typename T>
   void removeLastComponentT(uint64_t entityID)
   {
-    removeLastComponent(entityID, TemplateID<T>::getID());
+    removeLastComponent(entityID, getESTypeID<T>());
   }
   /// @}
 
@@ -109,7 +115,7 @@ public:
   template <typename T>
   typename ComponentContainer<T>::ComponentItem* getStaticComponents()
   {
-    BaseComponentContainer* componentContainer = getComponentContainer(TemplateID<T>::getID());
+    BaseComponentContainer* componentContainer = getComponentContainer(getESTypeID<T>());
     if (componentContainer != nullptr)
     {
       ComponentContainer<T>* concreteContainer = dynamic_cast<ComponentContainer<T>*>(componentContainer);
@@ -124,7 +130,7 @@ public:
   template <typename T>
   T* getStaticComponent(int index = 0)
   {
-    BaseComponentContainer* componentContainer = getComponentContainer(TemplateID<T>::getID());
+    BaseComponentContainer* componentContainer = getComponentContainer(getESTypeID<T>());
     if (componentContainer != nullptr)
     {
       ComponentContainer<T>* concreteContainer = dynamic_cast<ComponentContainer<T>*>(componentContainer);
@@ -195,35 +201,52 @@ protected:
   /// components (for lighting, view camera position, input, etc...).
   /// Static components and regular components cannot be mixed.
   /// Returns the index of the static component.
-  template <typename T, class CompCont = ComponentContainer<T>>
+
+  // template <typename T, class CompCont = ComponentContainer<T>>
+  // size_t coreAddStaticComponent(const T& component)
+  // {
+  //   // If the container isn't already marked as static, mark it and ensure
+  //   // that it is empty.
+  //   BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
+  //   CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
+  //   return concreteContainer->addStaticComponent(component);
+  // }
+
+  // See: http://thbecker.net/articles/rvalue_references/section_08.html
+  // Reference collapsing rules:
+  // A& & becomes A&
+  // A& && becomes A&
+  // A&& & becomes A&
+  // A&& && becomes A&&
+
+  template <typename T, class CompCont = ComponentContainer<typename std::decay<T>::type>>
   size_t coreAddStaticComponent(const T& component)
   {
-    // If the container isn't already marked as static, mark it and ensure
-    // that it is empty.
-    BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
-    CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
-    return concreteContainer->addStaticComponent(component);
+   // If the container isn't already marked as static, mark it and ensure
+   // that it is empty.
+   BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
+   CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
+   return concreteContainer->addStaticComponent(component);
   }
 
-  ///// Same function as above, but we bind to an rvalue reference.
-  //template <typename T, class CompCont = ComponentContainer<T>>
-  //size_t coreAddStaticComponent(T&& component)
-  //{
-  //  // If the container isn't already marked as static, mark it and ensure
-  //  // that it is empty.
-  //  BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
-  //  CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
-  //  return concreteContainer->addStaticComponent(std::move(component));
-  //}
+  template <typename T, class CompCont = ComponentContainer<typename std::decay<T>::type>>
+  size_t coreAddStaticComponent(T&& component)
+  {
+   // If the container isn't already marked as static, mark it and ensure
+   // that it is empty.
+   BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
+   CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
+   return concreteContainer->addStaticComponent(std::forward(component));
+  }
 
   template <typename T, class CompCont>
   BaseComponentContainer* ensureComponentArrayExists()
   {
-    BaseComponentContainer* componentContainer = getComponentContainer(TemplateID<T>::getID());
+    BaseComponentContainer* componentContainer = getComponentContainer(getESTypeID<T>());
     if (componentContainer == nullptr)
     {
       componentContainer = new CompCont();
-      addComponentContainer(componentContainer, TemplateID<T>::getID());
+      addComponentContainer(componentContainer, getESTypeID<T>());
     }
     return componentContainer;
   }

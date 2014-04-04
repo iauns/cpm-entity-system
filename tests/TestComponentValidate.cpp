@@ -151,9 +151,9 @@ TEST(EntitySystem, TestComponentValidate)
   EXPECT_EQ(es::TemplateID<CompHomPos>::getID(), components[1]);
   EXPECT_EQ(es::TemplateID<CompGameplay>::getID(), components[2]);
 
-  es::BaseComponentContainer* ccPos  = core->getComponentContainer(es::TemplateID<CompPosition>::getID());
-  es::BaseComponentContainer* ccHPos = core->getComponentContainer(es::TemplateID<CompHomPos>::getID());
-  es::BaseComponentContainer* ccGP   = core->getComponentContainer(es::TemplateID<CompGameplay>::getID());
+  es::BaseComponentContainer* ccPos  = core->getComponentContainer(es::getESTypeID<CompPosition>());
+  es::BaseComponentContainer* ccHPos = core->getComponentContainer(es::getESTypeID<CompHomPos>());
+  es::BaseComponentContainer* ccGP   = core->getComponentContainer(es::getESTypeID<CompGameplay>());
 
   EXPECT_EQ(1, ccPos->getNumComponentsWithSequence(startID + 0));
   EXPECT_EQ(0, ccPos->getNumComponentsWithSequence(startID + 1));
