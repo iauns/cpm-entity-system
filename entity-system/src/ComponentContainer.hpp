@@ -71,7 +71,7 @@ public:
 
     ComponentItem(uint64_t seq, T&& comp) :
         sequence(seq),
-        component(std::forward(comp))
+        component(std::forward<T>(comp))
     {}
 
     bool operator<(const ComponentItem& other) const
@@ -414,7 +414,7 @@ public:
   //    throw std::runtime_error("Attempting to add entityID component to static component container!");
   //    return;
   //  }
-  //  mComponents.emplace_back(sequence, std::forward(component));
+  //  mComponents.emplace_back(sequence, std::forward<T>(component));
   //}
 
   // /// Returns the index the static component was added at.
@@ -479,7 +479,7 @@ public:
      }
    }
    size_t newIndex = mComponents.size();
-   mComponents.emplace_back(StaticEntID, std::forward(component));
+   mComponents.emplace_back(StaticEntID, std::forward<T>(component));
    return newIndex;
   }
 

@@ -236,7 +236,7 @@ protected:
    // that it is empty.
    BaseComponentContainer* componentContainer = ensureComponentArrayExists<T, CompCont>();
    CompCont* concreteContainer = dynamic_cast<CompCont*>(componentContainer);
-   return concreteContainer->addStaticComponent(std::forward(component));
+   return concreteContainer->addStaticComponent(std::forward<T>(component));
   }
 
   template <typename T, class CompCont>

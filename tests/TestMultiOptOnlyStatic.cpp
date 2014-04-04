@@ -174,7 +174,7 @@ TEST(EntitySystem, MultiOptionalOnlyStaticTest)
 
   // Add static light directions
   std::vector<size_t> lightDirIndices;
-  for (auto it = lightDirs.begin(); it != lightDirs.end(); ++it)
+  for (auto it = lightDirs.cbegin(); it != lightDirs.cend(); ++it)
   {
     lightDirIndices.push_back(core->addStaticComponent(*it));
   }
@@ -187,7 +187,7 @@ TEST(EntitySystem, MultiOptionalOnlyStaticTest)
 
   // Add static 'cameras'
   std::vector<size_t> cameraIndices;
-  for (auto it = cameras.begin(); it != cameras.end(); ++it)
+  for (auto it = cameras.cbegin(); it != cameras.cend(); ++it)
   {
     cameraIndices.push_back(core->addStaticComponent(*it));
   }
@@ -232,7 +232,7 @@ TEST(EntitySystem, MultiOptionalOnlyFailStaticTest)
 
   // Add static light directions
   std::vector<size_t> lightDirIndices;
-  for (auto it = lightDirs.begin(); it != lightDirs.end(); ++it)
+  for (auto it = lightDirs.cbegin(); it != lightDirs.cend(); ++it)
   {
     lightDirIndices.push_back(core->addStaticComponent(*it));
   }
@@ -245,7 +245,7 @@ TEST(EntitySystem, MultiOptionalOnlyFailStaticTest)
 
   // Add static 'cameras'
   std::vector<size_t> cameraIndices;
-  for (auto it = cameras.begin(); it != cameras.end(); ++it)
+  for (auto it = cameras.cbegin(); it != cameras.cend(); ++it)
   {
     cameraIndices.push_back(core->addStaticComponent(*it));
   }

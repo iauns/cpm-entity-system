@@ -20,7 +20,7 @@ public:
   //template <typename T>
   //void addComponent(uint64_t entityID, T&& component)
   //{
-  //  coreAddComponent(entityID, std::move(component));
+  //  coreAddComponent(entityID, std::forward<T>(component));
   //}
 
   /// Returns the index of the static component.
@@ -30,11 +30,11 @@ public:
     return coreAddStaticComponent(component);
   }
 
-  //template <typename T>
-  //size_t addStaticComponent(T&& component)
-  //{
-  //  return coreAddStaticComponent(std::move(component));
-  //}
+  template <typename T>
+  size_t addStaticComponent(T&& component)
+  {
+    return coreAddStaticComponent(std::forward<T>(component));
+  }
 };
 
 } // namespace CPM_ES_NS
